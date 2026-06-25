@@ -1,0 +1,50 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && userId == request.auth.uid;
+    }
+
+    function isValidTask(data) {
+      return data.name is string && data.name.size() > 0 && data.name.size() <= 500
+          && data.deadline is string && data.deadline.size() <= 64
+          && (data.priority == 'high' || data.priority == 'medium' || data.priority == 'low')
+          && data.completed is bool
+          && isOwner(data.userId);
+    }
+
+    match /tasks/{taskId} {
+      // Secure list query checks and single reads
+      allow read: if isSignedIn() && (resource == null || resource.data.userId == request.auth.uid);
+      
+      // Creation requirements
+      allow create: if isSignedIn() 
+        && request.resource.data.userId == request.auth.uid 
+        && isValidTask(request.resource.data);
+      
+      // Update requirements
+      allow update: if isSignedIn() 
+        && resource.data.userId == request.auth.uid 
+        && request.resource.data.userId == request.auth.uid 
+        && isValidTask(request.resource.data);
+      
+      // Delete requirements
+      allow delete: if isSignedIn() 
+        && resource.data.userId == request.auth.uid;
+    }
+
+    match /calendar_connections/{uid} {
+      allow read, write: if isSignedIn() && uid == request.auth.uid;
+    }
+  }
+}

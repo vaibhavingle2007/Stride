@@ -1,0 +1,58 @@
+{
+  "entities": {
+    "Task": {
+      "title": "Task",
+      "description": "An agenda task or objective created by a user",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Title or short name"
+        },
+        "description": {
+          "type": "string",
+          "description": "Optional notes or details"
+        },
+        "deadline": {
+          "type": "string",
+          "description": "Deadline date formatted as YYYY-MM-DD"
+        },
+        "priority": {
+          "type": "string",
+          "enum": [
+            "high",
+            "medium",
+            "low"
+          ],
+          "description": "Urgency of task"
+        },
+        "completed": {
+          "type": "boolean",
+          "description": "Whether the task has been checked off"
+        },
+        "userId": {
+          "type": "string",
+          "description": "ID of owner user"
+        },
+        "createdAt": {
+          "type": "number",
+          "description": "Timestamp in milliseconds"
+        }
+      },
+      "required": [
+        "name",
+        "deadline",
+        "priority",
+        "completed",
+        "userId",
+        "createdAt"
+      ]
+    }
+  },
+  "firestore": {
+    "tasks/{taskId}": {
+      "schema": "Task",
+      "description": "User tasks stored at root level tasks"
+    }
+  }
+}

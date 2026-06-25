@@ -1,0 +1,85 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Geist+Mono:wght@300;400;500&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --font-mono: "Geist Mono", SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
+
+  /* Linear-style minimalist exact palette matching design system */
+  --color-zinc-50: #F7F7F8;
+  --color-zinc-100: #F7F7F8;
+  --color-zinc-200: #E4E4E7;
+  --color-zinc-300: #A1A1AA;
+  --color-zinc-400: #A1A1AA;
+  --color-zinc-500: #52525B;
+  --color-zinc-600: #52525B;
+  --color-zinc-700: #52525B;
+  --color-zinc-800: #18181B;
+  --color-zinc-900: #09090B;
+  --color-zinc-950: #09090B;
+
+  /* Soft warm accent colors allowed for tags: High (#FEF2F2 text #DC2626), Medium (#FFF7ED text #C2410C), Low (#F0FDF4 text #15803D) */
+  --color-orange-50: #FFF7ED;
+  --color-orange-100: #FFF7ED;
+  --color-orange-200: #FED7AA;
+  --color-orange-500: #C2410C;
+  --color-orange-600: #C2410C;
+
+  --color-amber-50: #FFF7ED;
+  --color-amber-100: #FFF7ED;
+  --color-amber-500: #C2410C;
+  --color-amber-600: #C2410C;
+
+  --color-emerald-50: #F0FDF4;
+  --color-emerald-100: #BBF7D0;
+  --color-emerald-500: #15803D;
+  --color-emerald-600: #15803D;
+}
+
+body {
+  background-color: #FFFFFF !important;
+  color: #09090B;
+  font-family: var(--font-sans);
+}
+
+@layer utilities {
+  /* Simple smooth entry animations */
+  .fade-in {
+    opacity: 0;
+    transform: translateY(4px);
+    animation: triggerFadeIn 0.12s ease-out forwards;
+  }
+
+  @keyframes triggerFadeIn {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  input[type="date"]::-webkit-calendar-picker-indicator {
+    opacity: 0.4;
+    cursor: pointer;
+    transition: opacity 0.12s ease;
+  }
+
+  input[type="date"]::-webkit-calendar-picker-indicator:hover {
+    opacity: 0.8;
+  }
+
+  /* Thin elegant custom scrollbars matches minimalist theme */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #E4E4E7;
+    border-radius: 4px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #A1A1AA;
+  }
+}
