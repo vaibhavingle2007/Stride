@@ -233,41 +233,6 @@ export default function CalendarSync({ userId, onSyncComplete }: CalendarSyncPro
             </svg>
             <span>Connect Google Calendar</span>
           </button>
-
-          <div className="mt-2 border-t border-zinc-100 pt-2">
-            <button
-              onClick={() => setShowSetup(!showSetup)}
-              className="text-[11.5px] font-medium text-zinc-500 hover:text-zinc-800 transition-colors flex items-center gap-1 cursor-pointer"
-            >
-              <span>{showSetup ? "Hide" : "Show"} Redirect URL for setup</span>
-              <svg
-                className={`w-3 h-3 transform transition-transform ${showSetup ? "rotate-180" : ""}`}
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-            </button>
-
-            {showSetup && (
-              <div className="mt-2 p-2.5 bg-zinc-50 rounded-lg border border-zinc-200 text-[11.5px] text-zinc-600 flex flex-col gap-1.5 leading-relaxed">
-                <span className="font-semibold text-zinc-700">Authorized Redirect URI:</span>
-                <div className="flex items-center justify-between gap-2 bg-white px-2 py-1.5 rounded border border-zinc-200 font-mono text-[10.5px] text-zinc-800 break-all">
-                  <span>{window.location.origin}/api/calendar/callback</span>
-                  <button
-                    onClick={handleCopyRedirect}
-                    className="shrink-0 text-[10.5px] font-sans text-zinc-500 hover:text-zinc-900 px-1.5 py-0.5 hover:bg-zinc-100 rounded transition-all cursor-pointer"
-                  >
-                    {copied ? "Copied!" : "Copy"}
-                  </button>
-                </div>
-                <p className="text-zinc-500 text-[10px] mt-0.5">
-                  Paste this URI into your Google Cloud Platform credentials settings under <strong>"Authorized redirect URIs"</strong>.
-                </p>
-              </div>
-            )}
-          </div>
         </div>
       )}
     </div>

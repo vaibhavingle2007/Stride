@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Task } from "../lib/gemini";
 import { motion, AnimatePresence } from "motion/react";
-import { Clock } from "lucide-react";
+import { Clock, Loader2, CalendarCheck, CalendarX } from "lucide-react";
 
 interface TaskListProps {
   tasks: Task[];
@@ -271,8 +271,53 @@ export default function TaskList({
           )}
         </div>
 
-        {/* Col 4: Date inline picker / Delete button on hover */}
-        <div className="w-[120px] flex items-center justify-end gap-3 text-right">
+        {/* Col 4: Sync Indicator + Date / Delete */}
+        <div className="w-[140px] flex items-center justify-end gap-2 text-right">
+          {/* Sync Indicator */}
+          {typeof window !== 'undefined' && localStorage.getItem('stride_gcal_token') && task.deadline && !task.completed && (
+            <div className="flex items-center justify-center w-[14px] flex-shrink-0">
+              {task.googleEventId ? (
+                <CalendarCheck className="w-[14px] h-[14px] text-[#15803D]" />
+              ) : (
+                (() => {
+                  // A tiny inline component for sync state
+                  const SyncIcon = () => {
+                    const [failed, setFailed] = useState(false);
+                    useEffect(() => {
+                      const timer = setTimeout(() => setFailed(true), 3000);
+                      return () => clearTimeout(timer);
+                    }, []);
+                    
+                    if (failed) {
+                      return (
+                        <CalendarX 
+                          className="w-[14px] h-[14px] text-[#C2410C] cursor-pointer" 
+                          title="Calendar sync failed. Tap to retry"
+                          onClick={() => {
+                            setFailed(false);
+                            import('../lib/calendarService').then(async ({ createCalendarEvent }) => {
+                              const googleEventId = await createCalendarEvent(task);
+                              if (googleEventId) {
+                                import('../lib/firebase').then(async ({ db }) => {
+                                  const { doc, updateDoc } = await import('firebase/firestore');
+                                  await updateDoc(doc(db, "tasks", task.id!), { googleEventId });
+                                });
+                              } else {
+                                setFailed(true);
+                              }
+                            });
+                          }}
+                        />
+                      );
+                    }
+                    return <Loader2 className="w-[14px] h-[14px] text-zinc-400 animate-spin" />;
+                  };
+                  return <SyncIcon />;
+                })()
+              )}
+            </div>
+          )}
+
           <div className="group-hover:hidden">
             {task.completed ? (
               <span className="text-[12px] font-mono text-zinc-300">
@@ -289,7 +334,7 @@ export default function TaskList({
           </div>
           <button
             onClick={() => onDeleteTask(task.id!)}
-            className="hidden group-hover:inline-block text-[12px] text-zinc-400 hover:text-red-600 font-normal transition-colors duration-100 cursor-pointer"
+            className="hidden group-hover:inline-block text-[12px] text-zinc-400 hover:text-red-600 font-normal transition-colors duration-100 cursor-pointer w-[110px]"
           >
             Delete
           </button>

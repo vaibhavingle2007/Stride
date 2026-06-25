@@ -892,6 +892,104 @@ items are still pending. Focus on 'Submit Vibe2Ship' first — it's due in 6 day
     }
   });
 
+  // API Route: Snap & Plan
+  app.post("/api/snap", async (req, res) => {
+    try {
+      const { imageBase64, mimeType, today } = req.body;
+      if (!imageBase64 || !mimeType) {
+        return res.status(400).json({ error: "Image data and mime type are required." });
+      }
+
+      const apiKey = process.env.GEMINI_API_KEY;
+      if (!apiKey) {
+        return res.status(500).json({ error: "GEMINI_API_KEY is not configured on the server." });
+      }
+
+      const ai = new GoogleGenAI({
+        apiKey,
+        httpOptions: {
+          headers: {
+            "User-Agent": "aistudio-build",
+          }
+        }
+      });
+
+      const tomorrowObj = new Date(today);
+      tomorrowObj.setDate(tomorrowObj.getDate() + 1);
+      const tomorrow = tomorrowObj.toISOString().split("T")[0];
+
+      const prompt = `
+You are a task extraction engine with computer vision.
+Carefully analyze this image — it may be a handwritten list, 
+whiteboard, timetable, assignment sheet, or typed document.
+
+Today's date: ${today}
+
+Extract EVERY task, action item, deadline, class, meeting, 
+or commitment visible in the image.
+
+Return ONLY valid JSON, no explanation, no markdown:
+{
+  "image_type": "handwritten_list | whiteboard | timetable | assignment_sheet | other",
+  "total_items_visible": number,
+  "tasks": [
+    {
+      "name": "clear task name — clean up any messy handwriting",
+      "deadline": "YYYY-MM-DD or null if not visible or inferable",
+      "priority": "high | medium | low",
+      "description": "any extra context, subject, or details visible",
+      "confidence": "high | medium | low",
+      "raw_text": "exact text as it appears in image"
+    }
+  ],
+  "unreadable_sections": "describe any parts that were unclear or unreadable, or null",
+  "overall_confidence": "high | medium | low"
+}
+
+Priority inference rules:
+- Words like urgent, important, !, due today/tomorrow = high
+- Exams, assignments with near deadlines = high
+- Meetings, calls, regular tasks = medium
+- Nice to have, someday, low priority words = low
+- Timetable classes = medium (recurring)
+
+Deadline inference rules:
+- Relative dates: infer from today (${today})
+- Day names (Monday, Friday) = next occurrence
+- "Tomorrow" = ${tomorrow}
+- Timetable entries: use the day shown, next occurrence
+- If only a time shown with no date: use today
+
+Return ONLY the JSON object. Never include markdown, 
+code fences, or any text outside the JSON.
+`;
+
+      const response = await generateContentWithFallback(ai, "gemini-2.5-flash", [
+        {
+          inlineData: {
+            mimeType,
+            data: imageBase64
+          }
+        },
+        prompt
+      ], {
+        responseMimeType: "application/json"
+      });
+
+      const responseText = response.text;
+      if (!responseText) {
+        throw new Error("No response from Gemini API.");
+      }
+
+      const result = extractJson(responseText);
+      return res.json(result);
+
+    } catch (error: any) {
+      console.error("Snap & Plan error:", error);
+      return res.status(500).json({ error: `AI service failed: ${error.message || "Unknown error"}` });
+    }
+  });
+
   // Hot Module Replacement (HMR) and serving static files
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({

@@ -1,21 +1,22 @@
 import React from "react";
 import { NavLink } from "../lib/router";
+import { User } from "firebase/auth";
+import { Camera } from "lucide-react";
 
 interface NavigationProps {
   user: User | null;
   onSignedIn?: () => void;
 }
 
-import { User } from "firebase/auth";
-
 export default function Navigation({ user }: NavigationProps) {
   const currentPath = window.location.pathname;
 
   const tabs = [
-    { name: "Dashboard", path: "/dashboard" },
-    { name: "AI Chat", path: "/chat" },
-    { name: "Calendar", path: "/calendar" },
-    { name: "Analytics", path: "/analytics" },
+    { name: "Dashboard", path: "/dashboard", icon: null },
+    { name: "AI Chat", path: "/chat", icon: null },
+    { name: "Calendar", path: "/calendar", icon: null },
+    { name: "Analytics", path: "/analytics", icon: null },
+    { name: "Snap & Plan", path: "/snap", icon: <Camera size={14} className="mr-1.5" /> },
   ];
 
   return (
@@ -37,6 +38,7 @@ export default function Navigation({ user }: NavigationProps) {
                       : "border-transparent text-zinc-400 hover:text-zinc-900"
                   }`}
                 >
+                  {tab.icon}
                   {tab.name}
                 </NavLink>
               );

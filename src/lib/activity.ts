@@ -3,7 +3,7 @@
  * Persists up to 50 items reactively in localStorage.
  */
 
-export type ActivityType = 'completed' | 'added' | 'schedule' | 'warning' | 'braindump';
+export type ActivityType = 'completed' | 'added' | 'schedule' | 'warning' | 'braindump' | 'snap';
 
 export interface ActivityEntry {
   type: ActivityType;

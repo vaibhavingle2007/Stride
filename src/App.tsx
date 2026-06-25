@@ -7,6 +7,7 @@ import Dashboard from "./pages/Dashboard";
 import AIChat from "./pages/AIChat";
 import CalendarView from "./pages/CalendarView";
 import Analytics from "./pages/Analytics";
+import SnapAndPlan from "./pages/SnapAndPlan";
 import { ArrowRight } from "lucide-react";
 
 export default function App() {
@@ -103,6 +104,12 @@ export default function App() {
       return (
         <AuthGuard>
           <Analytics user={user!} onSignOut={handleSignOut} />
+        </AuthGuard>
+      );
+    case "/snap":
+      return (
+        <AuthGuard>
+          <SnapAndPlan user={user!} onSignOut={handleSignOut} />
         </AuthGuard>
       );
     default:

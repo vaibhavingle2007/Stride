@@ -283,7 +283,7 @@ export default function Dashboard({ user, onSignOut }: DashboardProps) {
   const handleAddTask = async (taskData: Omit<Task, 'id' | 'completed'>) => {
     if (!user) return;
     try {
-      await addDoc(collection(db, "tasks"), {
+      const docRef = await addDoc(collection(db, "tasks"), {
         ...taskData,
         completed: false,
         userId: user.uid,
@@ -291,6 +291,15 @@ export default function Dashboard({ user, onSignOut }: DashboardProps) {
         deadline_changes: 0,
         original_deadline: taskData.deadline || ""
       });
+      const newTask = { id: docRef.id, ...taskData, priority: taskData.priority || 'medium' };
+      if (typeof window !== 'undefined' && localStorage.getItem('stride_gcal_token') && newTask.deadline) {
+        import('../lib/calendarService').then(async ({ createCalendarEvent }) => {
+          const googleEventId = await createCalendarEvent(newTask);
+          if (googleEventId) {
+            await updateDoc(docRef, { googleEventId });
+          }
+        });
+      }
     } catch (e) {
       handleFirestoreError(e, OperationType.CREATE, "tasks");
       throw e;
@@ -302,7 +311,7 @@ export default function Dashboard({ user, onSignOut }: DashboardProps) {
     if (!user) return;
     try {
       for (const t of newTasks) {
-        await addDoc(collection(db, "tasks"), {
+        const docRef = await addDoc(collection(db, "tasks"), {
           ...t,
           completed: false,
           userId: user.uid,
@@ -310,6 +319,15 @@ export default function Dashboard({ user, onSignOut }: DashboardProps) {
           deadline_changes: 0,
           original_deadline: t.deadline || ""
         });
+        const newTask = { id: docRef.id, ...t, priority: t.priority || 'medium' };
+        if (typeof window !== 'undefined' && localStorage.getItem('stride_gcal_token') && newTask.deadline) {
+          import('../lib/calendarService').then(async ({ createCalendarEvent }) => {
+            const googleEventId = await createCalendarEvent(newTask);
+            if (googleEventId) {
+              await updateDoc(docRef, { googleEventId });
+            }
+          });
+        }
       }
       logActivity("braindump", `Extracted and synchronized ${newTasks.length} tasks via Brain Dump`);
     } catch (e) {
@@ -321,10 +339,21 @@ export default function Dashboard({ user, onSignOut }: DashboardProps) {
   const handleToggleComplete = async (taskId: string, currentCompleted: boolean) => {
     try {
       const taskRef = doc(db, "tasks", taskId);
+      const isCompleting = !currentCompleted;
       await updateDoc(taskRef, {
-        completed: !currentCompleted,
-        completedAt: !currentCompleted ? getLocalDateString() : null
+        completed: isCompleting,
+        completedAt: isCompleting ? getLocalDateString() : null
       });
+      const task = tasks.find(t => t.id === taskId);
+      if (task?.googleEventId && typeof window !== 'undefined' && localStorage.getItem('stride_gcal_token')) {
+        import('../lib/calendarService').then(({ completeCalendarEvent, updateCalendarEvent }) => {
+          if (isCompleting) {
+            completeCalendarEvent(task, task.googleEventId as string);
+          } else {
+            updateCalendarEvent(task, task.googleEventId as string);
+          }
+        });
+      }
     } catch (e) {
       handleFirestoreError(e, OperationType.UPDATE, `tasks/${taskId}`);
     }
@@ -346,6 +375,20 @@ export default function Dashboard({ user, onSignOut }: DashboardProps) {
         deadline_changes: changesCount,
         original_deadline: originalDeadline
       });
+      
+      const updatedTask = { ...task, deadline: newDeadline };
+      if (typeof window !== 'undefined' && localStorage.getItem('stride_gcal_token')) {
+        import('../lib/calendarService').then(async ({ updateCalendarEvent, createCalendarEvent }) => {
+          if (updatedTask.googleEventId) {
+            await updateCalendarEvent(updatedTask, updatedTask.googleEventId);
+          } else if (newDeadline) {
+            const googleEventId = await createCalendarEvent(updatedTask);
+            if (googleEventId) {
+              await updateDoc(taskRef, { googleEventId });
+            }
+          }
+        });
+      }
     } catch (e) {
       handleFirestoreError(e, OperationType.UPDATE, `tasks/${taskId}`);
     }
@@ -354,6 +397,12 @@ export default function Dashboard({ user, onSignOut }: DashboardProps) {
   // 4. Delete Action
   const handleDeleteTask = async (taskId: string) => {
     try {
+      const task = tasks.find(t => t.id === taskId);
+      if (task?.googleEventId && typeof window !== 'undefined' && localStorage.getItem('stride_gcal_token')) {
+        import('../lib/calendarService').then(({ deleteCalendarEvent }) => {
+          deleteCalendarEvent(task.googleEventId as string);
+        });
+      }
       const taskRef = doc(db, "tasks", taskId);
       await deleteDoc(taskRef);
     } catch (e) {
