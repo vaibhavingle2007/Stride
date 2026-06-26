@@ -94,7 +94,14 @@ export default function SnapAndPlan({ user, onSignOut }: SnapAndPlanProps) {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to extract tasks");
+        let errStr = "Failed to extract tasks";
+        try {
+          const errData = await response.json();
+          if (errData.error) errStr = errData.error;
+        } catch {
+           // ignore
+        }
+        throw new Error(errStr);
       }
 
       const result: AnalysisResult = await response.json();

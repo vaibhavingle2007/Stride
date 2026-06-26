@@ -13,10 +13,10 @@ export default function Navigation({ user }: NavigationProps) {
 
   const tabs = [
     { name: "Dashboard", path: "/dashboard", icon: null },
+    { name: "Snap & Plan", path: "/snap", icon: <Camera size={14} className="mr-1.5" /> },
     { name: "AI Chat", path: "/chat", icon: null },
     { name: "Calendar", path: "/calendar", icon: null },
     { name: "Analytics", path: "/analytics", icon: null },
-    { name: "Snap & Plan", path: "/snap", icon: <Camera size={14} className="mr-1.5" /> },
   ];
 
   return (

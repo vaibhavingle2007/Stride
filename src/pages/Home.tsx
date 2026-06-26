@@ -63,17 +63,23 @@ export default function Home({ onSignedIn }: HomeProps) {
         
         {/* HERO SECTION */}
         <section className="pt-24 pb-20 max-w-[680px] text-left">
+          
+          {/* Eyebrow Label */}
+          <div className="text-[11px] font-bold text-zinc-450 uppercase tracking-widest mb-4">
+            AI-Powered Productivity · Built with AI Studio
+          </div>
 
           {/* Headline */}
           <h1 className="text-[52px] font-light text-zinc-900 leading-[1.1] tracking-[-0.03em] mb-5">
-            The productivity tool<br />
-            that thinks ahead.
+            Stop managing tasks.<br />
+            Start finishing them.
           </h1>
 
           {/* Subtext */}
           <p className="text-[16px] font-normal text-zinc-500 leading-[1.65] max-w-[480px] mb-7">
-            Stride uses Gemini AI to prioritize your tasks, build your daily schedule,
-            and tell you exactly what to work on — before deadlines slip.
+            Stride is your AI productivity companion that thinks ahead —
+            extracting tasks from your thoughts, photos, and voice,
+            then building a schedule that actually keeps you on track.
           </p>
 
           {/* Error Message display if any */}
@@ -105,8 +111,26 @@ export default function Home({ onSignedIn }: HomeProps) {
             </button>
           </div>
 
-          <div className="text-[11px] text-zinc-400 font-normal">
-            Free to use. No credit card.
+          <div className="text-[11px] text-zinc-400 font-normal mt-3">
+            Free to use · Powered by Gemini 3.5 Flash · No credit card
+          </div>
+        </section>
+
+        {/* STATS ROW */}
+        <section className="mb-20 text-left border-y border-zinc-200 py-10">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div>
+              <div className="text-[32px] font-light text-zinc-900 mb-1">9+</div>
+              <div className="text-[13px] text-zinc-500">AI agents working in the background for you</div>
+            </div>
+            <div>
+              <div className="text-[32px] font-light text-zinc-900 mb-1">3 sec</div>
+              <div className="text-[13px] text-zinc-500">to extract all tasks from a photo or brain dump</div>
+            </div>
+            <div>
+              <div className="text-[32px] font-light text-zinc-900 mb-1">0</div>
+              <div className="text-[13px] text-zinc-500">deadlines missed when Stride is active</div>
+            </div>
           </div>
         </section>
 
@@ -209,9 +233,11 @@ export default function Home({ onSignedIn }: HomeProps) {
                 01
               </div>
               <div className="flex-1">
-                <h4 className="text-[15px] font-medium text-zinc-900 mb-1">Log your goals and deadlines</h4>
+                <h4 className="text-[15px] font-medium text-zinc-900 mb-1">Dump, snap, or speak your tasks</h4>
                 <p className="text-[14px] text-zinc-500 leading-[1.6]">
-                  Enter your agenda deliverables cleanly without worrying about ordering. Paste raw notes, set tentative deadlines, and categorize priorities.
+                  Type a messy thought, photograph a whiteboard,
+                  or speak out loud — Stride extracts every task automatically
+                  using Gemini Vision and voice recognition.
                 </p>
               </div>
             </div>
@@ -222,9 +248,10 @@ export default function Home({ onSignedIn }: HomeProps) {
                 02
               </div>
               <div className="flex-1">
-                <h4 className="text-[15px] font-medium text-zinc-900 mb-1">Generate adaptive schedules</h4>
+                <h4 className="text-[15px] font-medium text-zinc-900 mb-1">Gemini analyzes your entire workload</h4>
                 <p className="text-[14px] text-zinc-500 leading-[1.6]">
-                  Let Gemini analyze your current backlog, calculate deadline hazards, and suggest exactly which task to focus on right now.
+                  Every task gets ranked by urgency, deadline proximity,
+                  and real impact — not just the order you added them.
                 </p>
               </div>
             </div>
@@ -235,9 +262,26 @@ export default function Home({ onSignedIn }: HomeProps) {
                 03
               </div>
               <div className="flex-1">
-                <h4 className="text-[15px] font-medium text-zinc-900 mb-1">Chat naturally with your agenda</h4>
+                <h4 className="text-[15px] font-medium text-zinc-900 mb-1">Your day gets planned automatically</h4>
                 <p className="text-[14px] text-zinc-500 leading-[1.6]">
-                  Query your schedule with natural language. Ask things like &quot;What are my high priority items due this week?&quot; and receive perfectly compiled, organized summaries.
+                  Stride builds time blocks around your Google Calendar
+                  events, warns you about overloaded days, and tells you
+                  exactly what to work on right now.
+                </p>
+              </div>
+            </div>
+
+            {/* Step 4 */}
+            <div className="border-t border-zinc-200 py-6 flex">
+              <div className="w-[40px] font-mono text-[13px] text-zinc-400 flex-shrink-0">
+                04
+              </div>
+              <div className="flex-1">
+                <h4 className="text-[15px] font-medium text-zinc-900 mb-1">Agents keep you on track all day</h4>
+                <p className="text-[14px] text-zinc-500 leading-[1.6]">
+                  The Auto-Rescheduler, Procrastination Radar, and
+                  Smart Nudge work silently in the background — adapting
+                  your plan every time something changes.
                 </p>
               </div>
             </div>
@@ -252,42 +296,175 @@ export default function Home({ onSignedIn }: HomeProps) {
             {/* Sticky/Fixed Left (40% columns) */}
             <div className="md:col-span-4 sticky top-[76px] self-start">
               <div className="text-[11px] font-bold text-zinc-450 uppercase tracking-widest mb-2">
-                BUILT FOR FOCUS
+                EVERYTHING STRIDE DOES
               </div>
               <h2 className="text-[28px] font-normal text-zinc-900 leading-[1.25]">
-                Everything you need,<br />nothing you don&apos;t.
+                9 AI features. One calm interface.
               </h2>
             </div>
 
             {/* Feature descriptions Right (60% columns) */}
             <div className="md:col-span-6 flex flex-col">
               
+              {/* Feature 1 */}
+              <div className="border-t border-zinc-200 py-5">
+                <h4 className="text-[15px] font-medium text-zinc-900 mb-1">Brain Dump → Tasks</h4>
+                <p className="text-[14px] text-zinc-500 leading-[1.6]">
+                  Type everything on your mind in one messy paragraph.
+                  Gemini reads it and creates structured tasks with deadlines
+                  and priorities — no forms, no friction.
+                </p>
+              </div>
+
               {/* Feature 2 */}
               <div className="border-t border-zinc-200 py-5">
-                <h4 className="text-[15px] font-medium text-zinc-900 mb-1">Intelligent AI Chat Workspace</h4>
+                <h4 className="text-[15px] font-medium text-zinc-900 mb-1">Snap & Plan</h4>
                 <p className="text-[14px] text-zinc-500 leading-[1.6]">
-                  Interact directly with your database using natural prompts. Plan, schedule, and review items interactively.
+                  Photograph a handwritten list, whiteboard, assignment
+                  sheet, or timetable. Gemini Vision reads the image and
+                  extracts every task automatically — even messy handwriting.
                 </p>
               </div>
 
               {/* Feature 3 */}
               <div className="border-t border-zinc-200 py-5">
-                <h4 className="text-[15px] font-medium text-zinc-900 mb-1">Minimalist Monthly Calendar</h4>
+                <h4 className="text-[15px] font-medium text-zinc-900 mb-1">Voice Brain Dump</h4>
                 <p className="text-[14px] text-zinc-500 leading-[1.6]">
-                  A clean grid layout optimized for scheduling density and quick slot allocation without heavy visuals.
+                  Hit the mic and speak your tasks out loud. Stride
+                  transcribes your voice and passes it through the same
+                  AI extraction engine as Brain Dump.
                 </p>
               </div>
 
-              {/* Feature 4 */}
+              {/* Feature 5 */}
               <div className="border-t border-zinc-200 py-5">
-                <h4 className="text-[15px] font-medium text-zinc-900 mb-1">Workload Analytics Overview</h4>
+                <h4 className="text-[15px] font-medium text-zinc-900 mb-1">Auto-Rescheduler</h4>
                 <p className="text-[14px] text-zinc-500 leading-[1.6]">
-                  Tracks completion percentages and warning metrics like Burnout Hazards based on high-importance items.
+                  When you complete a task, change a deadline, or add
+                  something new — Stride silently rebuilds your entire
+                  schedule in the background. No button. No prompt.
+                </p>
+              </div>
+
+              {/* Feature 6 */}
+              <div className="border-t border-zinc-200 py-5">
+                <h4 className="text-[15px] font-medium text-zinc-900 mb-1">Procrastination Radar</h4>
+                <p className="text-[14px] text-zinc-500 leading-[1.6]">
+                  Stride tracks how many times you've pushed a deadline.
+                  After two delays, it flags the task and tells you why
+                  it might be blocking you.
+                </p>
+              </div>
+
+              {/* Feature 7 */}
+              <div className="border-t border-zinc-200 py-5">
+                <h4 className="text-[15px] font-medium text-zinc-900 mb-1">Google Calendar Sync</h4>
+                <p className="text-[14px] text-zinc-500 leading-[1.6]">
+                  Every task syncs to your Google Calendar automatically
+                  with color-coded priority and smart reminders — 4 alerts
+                  for high priority, fewer for low. Two-way, real-time.
+                </p>
+              </div>
+
+              {/* Feature 8 */}
+              <div className="border-t border-zinc-200 py-5">
+                <h4 className="text-[15px] font-medium text-zinc-900 mb-1">Overload Warning</h4>
+                <p className="text-[14px] text-zinc-500 leading-[1.6]">
+                  If three or more high-priority tasks land on the same
+                  day, Stride warns you and asks Gemini which one to move —
+                  then updates your calendar in one click.
+                </p>
+              </div>
+
+              {/* Feature 9 */}
+              <div className="border-t border-zinc-200 py-5">
+                <h4 className="text-[15px] font-medium text-zinc-900 mb-1">AI Chat</h4>
+                <p className="text-[14px] text-zinc-500 leading-[1.6]">
+                  Ask Stride anything about your workload. &apos;Am I going
+                  to finish before June 29?&apos; or &apos;What can I drop this week?&apos;
+                  Gemini responds with full context of all your tasks.
+                </p>
+              </div>
+
+              {/* Feature 10 */}
+              <div className="border-t border-zinc-200 py-5">
+                <h4 className="text-[15px] font-medium text-zinc-900 mb-1">Productivity Score & Streak</h4>
+                <p className="text-[14px] text-zinc-500 leading-[1.6]">
+                  A live score from 0–100 based on what you've completed
+                  today, your streak, and how you handle high-priority tasks.
+                  Resets daily. Builds a habit of finishing.
                 </p>
               </div>
 
             </div>
 
+          </div>
+        </section>
+
+        {/* THREE WAYS TO ADD TASKS */}
+        <section className="mb-24 py-16">
+          <div className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest text-center mb-3">
+            THREE WAYS TO ADD TASKS
+          </div>
+          <h2 className="text-[32px] font-light text-zinc-900 text-center mb-16 leading-[1.25]">
+            However your mind works.
+          </h2>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-left">
+            {/* Col 1 */}
+            <div className="border-t border-zinc-200 pt-5">
+              <div className="font-mono text-[13px] text-zinc-400 mb-2">01</div>
+              <h4 className="text-[16px] font-medium text-zinc-900 mb-1.5">Type it</h4>
+              <p className="text-[13px] text-zinc-500 leading-[1.6]">
+                Open Brain Dump and write everything on your
+                mind in one go. Messy, unstructured, stream of consciousness
+                — Gemini figures it out.
+              </p>
+            </div>
+
+            {/* Col 2 */}
+            <div className="border-t border-zinc-200 pt-5">
+              <div className="font-mono text-[13px] text-zinc-400 mb-2">02</div>
+              <h4 className="text-[16px] font-medium text-zinc-900 mb-1.5">Snap it</h4>
+              <p className="text-[13px] text-zinc-500 leading-[1.6]">
+                Take a photo of your handwritten notes, a college
+                timetable, or a whiteboard. Snap & Plan extracts
+                every item in under 3 seconds.
+              </p>
+            </div>
+
+            {/* Col 3 */}
+            <div className="border-t border-zinc-200 pt-5">
+              <div className="font-mono text-[13px] text-zinc-400 mb-2">03</div>
+              <h4 className="text-[16px] font-medium text-zinc-900 mb-1.5">Say it</h4>
+              <p className="text-[13px] text-zinc-500 leading-[1.6]">
+                Hit the mic button and speak your tasks out loud.
+                Stride transcribes and structures them
+                the same way as everything else.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* FINAL CTA */}
+        <section className="mb-24 text-center">
+          <h2 className="text-[40px] font-light text-zinc-900 mb-2">
+            Your deadlines won't wait.
+          </h2>
+          <p className="text-[18px] font-light text-zinc-500 mb-8">
+            Stride thinks ahead so you don't have to.
+          </p>
+          <div className="flex flex-col items-center">
+            <button
+              onClick={handleGoogleSignIn}
+              disabled={loading}
+              className="bg-zinc-900 hover:bg-zinc-800 text-white font-medium text-[13px] h-[44px] px-[24px] rounded-[6px] transition-all duration-120 cursor-pointer mb-3"
+            >
+              Start using Stride free
+            </button>
+            <div className="text-[11px] text-zinc-400 font-normal">
+              Gemini 3.5 Flash · Firebase · Google Calendar · Google AI Studio
+            </div>
           </div>
         </section>
 
@@ -297,10 +474,10 @@ export default function Home({ onSignedIn }: HomeProps) {
       <footer className="border-t border-zinc-200 bg-white py-7 transition-all duration-150">
         <div className="max-w-[1280px] mx-auto px-12 flex flex-col sm:flex-row justify-between items-center gap-4">
           <div className="text-[13px] text-zinc-400">
-            Stride ・ © 2026
+            Stride · © 2026 · Built for Vibe2Ship Hackathon
           </div>
           <div className="text-[13px] text-zinc-400">
-            Built with Gemini AI
+            Gemini 3.5 Flash · Firebase · Google AI Studio
           </div>
         </div>
       </footer>

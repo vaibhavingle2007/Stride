@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { Task } from "../lib/gemini";
 import { motion, AnimatePresence } from "motion/react";
 import { Clock, Loader2, CalendarCheck, CalendarX } from "lucide-react";
+import { db } from "../lib/firebase";
+import { doc, updateDoc } from "firebase/firestore";
 
 interface TaskListProps {
   tasks: Task[];
@@ -298,10 +300,7 @@ export default function TaskList({
                             import('../lib/calendarService').then(async ({ createCalendarEvent }) => {
                               const googleEventId = await createCalendarEvent(task);
                               if (googleEventId) {
-                                import('../lib/firebase').then(async ({ db }) => {
-                                  const { doc, updateDoc } = await import('firebase/firestore');
-                                  await updateDoc(doc(db, "tasks", task.id!), { googleEventId });
-                                });
+                                await updateDoc(doc(db, "tasks", task.id!), { googleEventId });
                               } else {
                                 setFailed(true);
                               }

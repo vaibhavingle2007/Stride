@@ -193,7 +193,7 @@ export async function generateContentWithFallback(
   contents: any,
   config?: any
 ) {
-  const modelsToTry = [preferredModel, "gemini-3.1-flash-lite", "gemini-flash-latest"];
+  const modelsToTry = Array.from(new Set([preferredModel, "gemini-3.5-flash"]));
   let lastError: any = null;
 
   for (const model of modelsToTry) {
@@ -254,7 +254,8 @@ async function startServer() {
   const app = express();
   const PORT = 3000;
 
-  app.use(express.json());
+  app.use(express.json({ limit: '50mb' }));
+  app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
   // API Route: Analyze Tasks using Gemini 2.0 Flash
   app.post("/api/analyze", async (req, res) => {
@@ -964,14 +965,14 @@ Return ONLY the JSON object. Never include markdown,
 code fences, or any text outside the JSON.
 `;
 
-      const response = await generateContentWithFallback(ai, "gemini-2.5-flash", [
+      const response = await generateContentWithFallback(ai, "gemini-3.5-flash", [
         {
           inlineData: {
             mimeType,
             data: imageBase64
           }
         },
-        prompt
+        { text: prompt }
       ], {
         responseMimeType: "application/json"
       });
