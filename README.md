@@ -1,253 +1,62 @@
-# Stride — AI-Powered Productivity Engine
+# Stride — AI Deadline Companion & Google Calendar Sync
 
-> **Stop managing tasks. Start finishing them.**
+Stride is an AI-powered deadline and productivity companion. This document explains how to set up and configure the **Google Calendar Sync** integration.
 
-Stride is a full-stack AI productivity companion that thinks ahead — extracting tasks from your thoughts, photos, and voice, then building a schedule that actually keeps you on track.
+## How It Works
 
-Built for the **Vibe2Ship Hackathon** using **Google AI Studio**, **Gemini 3.5 Flash**, **Firebase**, and **React**.
-
----
-
-## ✨ Features
-
-Stride packs **13+ AI-powered features** into one clean interface:
-
-| Feature | Description |
-|---|---|
-| 🧠 **Brain Dump → Tasks** | Type a messy stream of consciousness — Gemini reads it and creates structured tasks with deadlines and priorities |
-| 📷 **Snap & Plan** | Photograph a whiteboard, assignment sheet, or handwritten list — Gemini Vision extracts every task automatically |
-| 🎙️ **Voice Brain Dump** | Speak your tasks out loud; Stride transcribes and structures them via the AI extraction engine |
-| 🔄 **Auto-Rescheduler** | Silently rebuilds your full schedule in the background whenever a task is completed, added, or changed |
-| 🎯 **Procrastination Radar** | Tracks deadline changes; flags tasks after 2 delays and explains what might be blocking you |
-| 📅 **Google Calendar Sync** | Two-way real-time sync with color-coded priorities and smart reminders (4 alerts for High priority) |
-| ⚠️ **Overload Warning** | Warns when 3+ high-priority tasks fall on the same day; asks Gemini which to move, then updates your calendar in one click |
-| 💬 **AI Chat Coach** | Ask anything: *"Am I going to finish before June 29?"* — Gemini responds with full context of all your tasks |
-| 📊 **Productivity Score & Streak** | A live 0–100 score based on daily completions, streak, and high-priority handling — resets daily to build habits |
-| 🔮 **Predictive Risk Assessment** | Analyzes your workload to proactively foresee and alert you about missed deadlines before they happen |
-| 🚨 **Visual Risk Indicators** | Highlights at-risk tasks with intuitive visual tags to keep your focus on what needs immediate attention |
-| 🪜 **AI Micro-Steps & Context** | Breaks large tasks into bite-sized, achievable steps with automatically added context and resources |
-| ⏱️ **Integrated Timer & Actions** | Built-in focus timers and swift task actions to keep you in the zone |
-| 📈 **Analytics Dashboard** | Completion rate, weekly velocity, priority breakdown, gamification badges, and AI-powered insights |
+Stride's Google Calendar integration synchronizes your tasks bidirectionally with Google Calendar:
+1. **Pushes Stride Tasks to Google Calendar**: Tasks created in Stride automatically appear as all-day events on a dedicated "Stride Tasks" secondary calendar or your primary calendar.
+2. **Imports Google Calendar Events**: Events on Google Calendar containing `[stride]` in their description or title are automatically imported into Stride.
+3. **Automatic Live Updates**: Modifying a task's name, description, or deadline, or completing/deleting a task in Stride, automatically updates the corresponding Google Calendar event (debounced to avoid rate limit issues).
 
 ---
 
-## 🛠️ Tech Stack
+## Step-by-Step Setup Guide
 
-| Layer | Technology |
-|---|---|
-| **Frontend** | React 19, TypeScript, Vite 6, Tailwind CSS v4 |
-| **Backend** | Node.js, Express, TypeScript (`tsx`) |
-| **AI** | Google Gemini 3.5 Flash (`@google/genai`) |
-| **Auth** | Firebase Authentication (Google Sign-In) |
-| **Database** | Cloud Firestore |
-| **Calendar** | Google Calendar API (OAuth 2.0) |
-| **Animation** | Motion (Framer Motion v12) |
-| **Icons** | Lucide React |
+To enable Google Calendar synchronization, you must configure a Google OAuth 2.0 Web Client.
 
----
+### Step 1: Create a Project on Google Cloud Console
+1. Go to the [Google Cloud Console](https://console.cloud.google.com/).
+2. Create a new project named **Stride Calendar Sync** (or select an existing one).
 
-## 📁 Project Structure
+### Step 2: Enable the Google Calendar API
+1. In the Cloud Console, search for **Google Calendar API** in the top search bar.
+2. Click **Enable** to turn on the Google Calendar API for your project.
 
-```
-stride/
-├── src/
-│   ├── pages/
-│   │   ├── Home.tsx          # Landing page with features showcase
-│   │   ├── Dashboard.tsx     # Main workspace (tasks, brain dump, widgets)
-│   │   ├── AIChat.tsx        # Gemini-powered productivity chat coach
-│   │   ├── CalendarView.tsx  # Google Calendar integration UI
-│   │   ├── Analytics.tsx     # Productivity stats, badges & AI insights
-│   │   ├── SnapAndPlan.tsx   # Image → tasks extraction (Gemini Vision)
-│   │   ├── Privacy.tsx       # Privacy policy
-│   │   └── Terms.tsx         # Terms of service
-│   ├── components/
-│   │   ├── TaskList.tsx         # Task list with inline editing & risk flags
-│   │   ├── TaskInput.tsx        # Add task form
-│   │   ├── BrainDump.tsx        # Free-text & voice task extraction
-│   │   ├── RightPanelWidgets.tsx # AI schedule, score, nudge, calendar sync
-│   │   ├── SmartNudgeBanner.tsx  # Contextual nudge banner
-│   │   ├── AIPlan.tsx           # AI micro-step planner
-│   │   ├── CalendarSync.tsx     # Google Calendar connect/disconnect
-│   │   ├── FocusModeModal.tsx   # Focus timer modal
-│   │   ├── Header.tsx           # App header with user info & sign-out
-│   │   └── Navigation.tsx       # Workspace navigation bar
-│   └── lib/
-│       ├── firebase.ts          # Firebase client initialization
-│       ├── gemini.ts            # Gemini types & shared interfaces
-│       ├── calendar.ts          # Calendar utility functions
-│       ├── calendarService.ts   # Google Calendar event CRUD
-│       ├── productivity.ts      # Score, streak & date utilities
-│       ├── risk.ts              # Risk assessment logic
-│       ├── activity.ts          # Activity logging
-│       ├── firestore-errors.ts  # Firestore error handler
-│       └── router.tsx           # Client-side hash router
-├── server.ts                # Express backend — all AI & Calendar API routes
-├── firestore.rules          # Firestore security rules
-├── firebase-blueprint.json  # Data model specification
-├── vite.config.ts           # Vite build configuration
-├── tsconfig.json
-└── package.json
-```
+### Step 3: Configure the OAuth Consent Screen
+1. Go to **APIs & Services** > **OAuth consent screen**.
+2. Select **External** user type and click **Create**.
+3. Fill in the required fields:
+   - **App name**: `Stride`
+   - **User support email**: Your email address
+   - **Developer contact information**: Your email address
+4. Click **Save and Continue**.
+5. On the **Scopes** screen, click **Add or Remove Scopes**, find and check `.../auth/calendar.events` (Google Calendar API - View and edit events on all your calendars), then click **Update** and **Save and Continue**.
+6. On the **Test Users** screen, add your personal Google account email address so you can test the authentication flow.
+
+### Step 4: Create OAuth 2.0 Client Credentials
+1. Go to **APIs & Services** > **Credentials**.
+2. Click **+ Create Credentials** at the top and select **OAuth client ID**.
+3. Set the **Application type** to **Web application**.
+4. Set the **Name** to `Stride Web App`.
+5. Under **Authorized redirect URIs**, click **+ Add URI** and enter:
+   - `https://<YOUR_APP_URL>/api/calendar/callback`
+   *(Replace `<YOUR_APP_URL>` with your actual app hosting domain, e.g. from the AI Studio browser preview bar, or `http://localhost:3000/api/calendar/callback` for local development).*
+6. Click **Create** to generate your credentials.
+7. Copy the **Client ID** and **Client Secret**.
+
+### Step 5: Configure Secrets in AI Studio
+1. Open the **Secrets** or **Settings** panel in the AI Studio UI for your application.
+2. Add the following environment variables with your credentials:
+   - `GOOGLE_CLIENT_ID`: (Your Google OAuth Client ID)
+   - `GOOGLE_CLIENT_SECRET`: (Your Google OAuth Client Secret)
+3. Ensure that `APP_URL` is configured to match your deployed URL (AI Studio handles this automatically).
 
 ---
 
-## 🚀 Getting Started
+## Technical Architecture Overview
 
-### Prerequisites
-
-- Node.js 18+
-- A [Google AI Studio](https://aistudio.google.com/) account with a Gemini API key
-- A Firebase project with **Authentication** (Google provider) and **Firestore** enabled
-- *(Optional)* Google Cloud OAuth credentials for Calendar sync
-
-### 1. Clone the Repository
-
-```bash
-git clone https://github.com/your-username/stride.git
-cd stride
-```
-
-### 2. Install Dependencies
-
-```bash
-npm install
-```
-
-### 3. Configure Environment Variables
-
-Copy the example file and fill in your credentials:
-
-```bash
-cp .env.example .env
-```
-
-Edit `.env`:
-
-```env
-# Required — Your Gemini API key from Google AI Studio
-GEMINI_API_KEY="your_gemini_api_key_here"
-
-# Required — The URL where this app is hosted (used for OAuth callbacks)
-APP_URL="http://localhost:3000"
-
-# Optional — Google Calendar OAuth credentials
-GOOGLE_CLIENT_ID=""
-GOOGLE_CLIENT_SECRET=""
-GOOGLE_OAUTH_REDIRECT_URI="http://localhost:3000/api/calendar/callback"
-```
-
-### 4. Configure Firebase
-
-1. Go to your [Firebase Console](https://console.firebase.google.com/)
-2. Create a project and enable **Google Authentication** and **Cloud Firestore**
-3. Update `src/lib/firebase.ts` with your Firebase project config
-4. Deploy the Firestore security rules from `firestore.rules`
-
-### 5. Run the Development Server
-
-```bash
-npm run dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) in your browser. Sign in with Google to get started.
-
----
-
-## 📜 Available Scripts
-
-| Command | Description |
-|---|---|
-| `npm run dev` | Start the development server (Vite + Express via `tsx`) |
-| `npm run build` | Build frontend (Vite) and bundle backend (esbuild) for production |
-| `npm run start` | Run the production build (`dist/server.cjs`) |
-| `npm run lint` | TypeScript type checking (`tsc --noEmit`) |
-
----
-
-## 🔌 API Endpoints
-
-The Express backend exposes these AI and calendar routes:
-
-| Method | Endpoint | Description |
-|---|---|---|
-| `POST` | `/api/analyze` | Analyze tasks — prioritize and build a day schedule |
-| `POST` | `/api/extract` | Brain dump — extract structured tasks from free text |
-| `POST` | `/api/reschedule` | Auto-rescheduler — rebuild schedule after task mutations |
-| `POST` | `/api/rebalance` | Overload warning — suggest which task to move |
-| `POST` | `/api/chat` | AI Chat coach — Gemini conversation with full task context |
-| `POST` | `/api/insight` | Analytics — generate a specific, actionable AI insight |
-| `GET` | `/api/calendar/auth-url` | Start Google Calendar OAuth flow |
-| `GET` | `/api/calendar/callback` | Handle OAuth callback and store tokens |
-| `GET` | `/api/calendar/status` | Check if Calendar is connected for a user |
-| `POST` | `/api/calendar/sync` | Two-way sync tasks ↔ Google Calendar events |
-| `POST` | `/api/calendar/disconnect` | Revoke calendar access |
-
----
-
-## 🗄️ Data Model
-
-### Firestore Collections
-
-**`tasks/{taskId}`**
-
-```typescript
-{
-  name: string;            // Task title (max 500 chars)
-  description: string;     // Optional notes
-  deadline: string;        // ISO date — "YYYY-MM-DD"
-  priority: "high" | "medium" | "low";
-  completed: boolean;
-  completedAt: string | null;  // Date string when completed
-  userId: string;          // Firebase Auth UID (owner)
-  createdAt: number;       // Timestamp (ms)
-  deadline_changes: number; // Count of deadline modifications
-  original_deadline: string; // Original deadline before any changes
-  googleEventId?: string;  // Linked Google Calendar event ID
-}
-```
-
-**`calendar_connections/{uid}`**
-
-```typescript
-{
-  refreshToken: string;
-  accessToken: string;
-  expiryDate: number;
-  calendarId: string;     // "primary"
-  syncEnabled: boolean;
-}
-```
-
----
-
-## 🔐 Security
-
-- **Firestore Rules**: All tasks are strictly scoped to the authenticated user's UID. Users can only read, create, update, and delete their own tasks.
-- **OAuth State**: CSRF protection is implemented via HMAC-signed state tokens during Google Calendar OAuth.
-- **AI Prompt Injection**: Brain dump text is sandboxed with explicit delimiters (`[BEGIN RAW TEXT]` / `[END RAW TEXT]`) and instruction to prevent prompt injection attacks.
-- **API Keys**: All secrets are server-side only via environment variables and never exposed to the client.
-
----
-
-## 🤖 AI Architecture
-
-Stride uses a resilient Gemini call architecture with:
-
-- **Model Fallback**: Automatically falls back to `gemini-3.5-flash` if the preferred model fails
-- **Exponential Backoff**: Retries up to 3 times for transient errors (429, 503, 504) with 1.5s → 3s delays
-- **JSON Extraction**: A robust `extractJson()` utility that handles markdown-wrapped, text-prefixed, or clean JSON responses from the model
-
----
-
-## 📄 License
-
-This project was built for the **Vibe2Ship Hackathon 2026**. See [Privacy Policy](/privacy) and [Terms of Service](/terms) for usage details.
-
----
-
-## 🙌 Acknowledgements
-
-- [Google AI Studio](https://aistudio.google.com/) — for the Gemini API and build environment
-- [Firebase](https://firebase.google.com/) — for auth and real-time database
-- [Lucide](https://lucide.dev/) — for the beautiful icon set
-- [Motion](https://motion.dev/) — for smooth animations
+### Backend OAuth Callback & Storage
+- **Consent URL**: Directed to Google's OAuth 2.0 servers with parameters `access_type=offline`, `prompt=consent`, and a cryptographically signed secure `state` parameter to prevent CSRF attacks.
+- **Callback (`/api/calendar/callback`)**: Exposes an endpoint that exchanges the authorization code for access and refresh tokens, parses the `state`, validates authenticity, and stores the tokens securely in Cloud Firestore under `calendar_connections/{uid}`.
+- **Server-to-Server Sync**: The server uses `firebase-admin` and `googleapis` to fetch the cached tokens, dynamically refresh them when expired, resolve task modifications, and synchronize bidirectionally with the user's calendars.
