@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import { Mic, MicOff } from "lucide-react";
 import { Task } from "../lib/gemini";
 import { getLocalDateString } from "../lib/productivity";
 
@@ -20,6 +21,71 @@ export default function BrainDump({ onAddTasks }: BrainDumpProps) {
   const [extractedTasks, setExtractedTasks] = useState<ExtractedTask[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isListening, setIsListening] = useState(false);
+  const recognitionRef = useRef<any>(null);
+  const shouldListenRef = useRef(false);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      if (SpeechRecognition) {
+        recognitionRef.current = new SpeechRecognition();
+        recognitionRef.current.continuous = true;
+        recognitionRef.current.interimResults = true;
+
+        recognitionRef.current.onresult = (event: any) => {
+          let finalTranscript = '';
+          for (let i = event.resultIndex; i < event.results.length; ++i) {
+            if (event.results[i].isFinal) {
+              finalTranscript += event.results[i][0].transcript;
+            }
+          }
+          if (finalTranscript) {
+            setUserInput((prev) => prev + (prev ? " " : "") + finalTranscript);
+          }
+        };
+
+        recognitionRef.current.onerror = (event: any) => {
+          console.error("Speech recognition error", event.error);
+          if (event.error === 'not-allowed' || event.error === 'service-not-allowed' || event.error === 'network') {
+            shouldListenRef.current = false;
+            setIsListening(false);
+          }
+        };
+
+        recognitionRef.current.onend = () => {
+          if (shouldListenRef.current) {
+            try {
+              recognitionRef.current?.start();
+            } catch (e) {
+              shouldListenRef.current = false;
+              setIsListening(false);
+            }
+          } else {
+            setIsListening(false);
+          }
+        };
+      }
+    }
+  }, []);
+
+  const toggleListening = () => {
+    if (isListening) {
+      shouldListenRef.current = false;
+      recognitionRef.current?.stop();
+      setIsListening(false);
+    } else {
+      try {
+        shouldListenRef.current = true;
+        recognitionRef.current?.start();
+        setIsListening(true);
+      } catch (err) {
+        console.error("Failed to start listening", err);
+        shouldListenRef.current = false;
+        setIsListening(false);
+      }
+    }
+  };
 
   const handleExtract = async () => {
     if (!userInput.trim() || loading) return;
@@ -106,16 +172,29 @@ export default function BrainDump({ onAddTasks }: BrainDumpProps) {
 
       <div className="space-y-4">
         {/* Single Textarea */}
-        <textarea
-          placeholder="Type everything on your mind... e.g. exam on friday, fix bug, call client monday, submit report"
-          value={userInput}
-          onChange={(e) => {
-            setUserInput(e.target.value);
-            if (error) setError(null);
-          }}
-          disabled={loading || submitting}
-          className="w-full h-[100px] p-3.5 bg-white border border-zinc-200 rounded-[6px] text-[14px] text-zinc-900 placeholder:text-zinc-350 focus:outline-none focus:border-zinc-400 resize-none transition-colors duration-125"
-        />
+        <div className="relative">
+          <textarea
+            placeholder="Type or say everything on your mind... e.g. exam on friday, fix bug, call client monday, submit report"
+            value={userInput}
+            onChange={(e) => {
+              setUserInput(e.target.value);
+              if (error) setError(null);
+            }}
+            disabled={loading || submitting}
+            className="w-full h-[100px] p-3.5 pr-12 bg-white border border-zinc-200 rounded-[6px] text-[14px] text-zinc-900 placeholder:text-zinc-350 focus:outline-none focus:border-zinc-400 resize-none transition-colors duration-125"
+          />
+          <button
+            type="button"
+            onClick={toggleListening}
+            title={isListening ? "Stop listening" : "Start listening"}
+            disabled={loading || submitting}
+            className={`absolute top-3.5 right-3.5 p-1.5 rounded-[4px] transition-colors ${
+              isListening ? "bg-red-50 text-red-500" : "text-zinc-400 hover:text-zinc-600 hover:bg-zinc-50"
+            }`}
+          >
+            {isListening ? <MicOff size={16} /> : <Mic size={16} />}
+          </button>
+        </div>
 
         {/* Error Feedback */}
         {error && (

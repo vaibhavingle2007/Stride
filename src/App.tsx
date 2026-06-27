@@ -8,6 +8,8 @@ import AIChat from "./pages/AIChat";
 import CalendarView from "./pages/CalendarView";
 import Analytics from "./pages/Analytics";
 import SnapAndPlan from "./pages/SnapAndPlan";
+import Privacy from "./pages/Privacy";
+import Terms from "./pages/Terms";
 import { ArrowRight } from "lucide-react";
 
 export default function App() {
@@ -82,6 +84,10 @@ export default function App() {
   switch (path) {
     case "/":
       return <Home onSignedIn={handleSignedIn} />;
+    case "/privacy":
+      return <Privacy />;
+    case "/terms":
+      return <Terms />;
     case "/dashboard":
       return (
         <AuthGuard>

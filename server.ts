@@ -965,7 +965,7 @@ Return ONLY the JSON object. Never include markdown,
 code fences, or any text outside the JSON.
 `;
 
-      const response = await generateContentWithFallback(ai, "gemini-3.5-flash", [
+      const response = await generateContentWithFallback(ai, "gemini-3.1-pro-preview", [
         {
           inlineData: {
             mimeType,
@@ -988,6 +988,100 @@ code fences, or any text outside the JSON.
     } catch (error: any) {
       console.error("Snap & Plan error:", error);
       return res.status(500).json({ error: `AI service failed: ${error.message || "Unknown error"}` });
+    }
+  });
+
+  // --- FOCUS MODE API ENDPOINTS ---
+
+  app.post("/api/risk-explanation", async (req, res) => {
+    try {
+      const { task, riskLevel } = req.body;
+      if (!task || !riskLevel) {
+        return res.status(400).json({ error: "Task and risk level are required" });
+      }
+
+      const apiKey = process.env.GEMINI_API_KEY;
+      if (!apiKey) {
+        return res.status(500).json({ error: "GEMINI_API_KEY is not configured" });
+      }
+
+      const ai = new GoogleGenAI({
+        apiKey,
+        httpOptions: { headers: { "User-Agent": "aistudio-build" } }
+      });
+
+      const prompt = `You are a calm, professional productivity coach.
+Analyze this task and its risk level to provide ONE short, direct sentence explaining the risk.
+Task: "${task.name}"
+Priority: ${task.priority}
+Deadline: ${task.deadline}
+Deadline changed ${task.deadline_changes || 0} times.
+Calculated Risk Level: ${riskLevel}
+
+Output exactly ONE JSON object with an "explanation" string property.
+Do NOT use markdown outside the JSON.
+Example format:
+{ "explanation": "This task is due today, high priority, and has already been delayed twice." }`;
+
+      const response = await generateContentWithFallback(ai, "gemini-3.5-flash", prompt, {
+        temperature: 0.2,
+      });
+
+      const result = extractJson(response.text);
+      return res.json(result);
+    } catch (e: any) {
+      console.error("Risk explanation error:", e);
+      return res.status(500).json({ error: "Failed to generate risk explanation" });
+    }
+  });
+
+  app.post("/api/focus-steps", async (req, res) => {
+    try {
+      const { task, riskLevel } = req.body;
+      if (!task || !riskLevel) {
+        return res.status(400).json({ error: "Task and risk level are required" });
+      }
+
+      const apiKey = process.env.GEMINI_API_KEY;
+      if (!apiKey) {
+        return res.status(500).json({ error: "GEMINI_API_KEY is not configured" });
+      }
+
+      const ai = new GoogleGenAI({
+        apiKey,
+        httpOptions: { headers: { "User-Agent": "aistudio-build" } }
+      });
+
+      const prompt = `You are a strict but helpful productivity coach.
+The user is about to start a 25-minute focus session for a high-risk task.
+Task: "${task.name}"
+Description: "${task.description || "None"}"
+Priority: ${task.priority}
+Deadline: ${task.deadline}
+
+Generate 3 extremely specific, tiny, practical micro-steps to get the user started RIGHT NOW.
+Avoid generic advice. The steps should be actionable immediately.
+
+Output exactly ONE JSON object with a "steps" array containing 3 strings.
+Do NOT use markdown outside the JSON.
+Example format:
+{
+  "steps": [
+    "Open the existing presentation deck.",
+    "Draft just the title of the first missing slide.",
+    "Outline the next 3 slides without formatting."
+  ]
+}`;
+
+      const response = await generateContentWithFallback(ai, "gemini-3.5-flash", prompt, {
+        temperature: 0.3,
+      });
+
+      const result = extractJson(response.text);
+      return res.json(result);
+    } catch (e: any) {
+      console.error("Focus steps error:", e);
+      return res.status(500).json({ error: "Failed to generate focus steps" });
     }
   });
 

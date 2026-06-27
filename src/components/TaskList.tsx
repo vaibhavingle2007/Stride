@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { Task } from "../lib/gemini";
 import { motion, AnimatePresence } from "motion/react";
-import { Clock, Loader2, CalendarCheck, CalendarX } from "lucide-react";
+import { Clock, Loader2, CalendarCheck, CalendarX, Target } from "lucide-react";
 import { db } from "../lib/firebase";
 import { doc, updateDoc } from "firebase/firestore";
+import { calculateRiskLevel, RiskLevel } from "../lib/risk";
+import FocusModeModal from "./FocusModeModal";
 
 interface TaskListProps {
   tasks: Task[];
@@ -82,6 +84,7 @@ export default function TaskList({
 }: TaskListProps) {
   const [reducedMotion, setReducedMotion] = useState(false);
   const [completingTaskId, setCompletingTaskId] = useState<string | null>(null);
+  const [focusTask, setFocusTask] = useState<{ task: Task; riskLevel: RiskLevel } | null>(null);
 
   useEffect(() => {
     const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -112,7 +115,7 @@ export default function TaskList({
     return a.localeCompare(b);
   });
 
-  const renderTaskRow = (task: Task) => {
+  const renderTaskRow = (task: Task, tasksOnSameDate: Task[] = []) => {
     // Priority Tag Styling Colors:
     // High: bg-[#FEF2F2] text-[#DC2626] border-[#FECACA]
     // Medium: bg-[#FFF7ED] text-[#C2410C] border-[#FED7AA]
@@ -131,6 +134,9 @@ export default function TaskList({
 
     const hasProcrastinated = (task.deadline_changes || 0) >= 2;
     const isEffectivelyCompleted = !!task.completed || completingTaskId === task.id;
+    
+    const riskLevel = calculateRiskLevel(task, tasksOnSameDate);
+    const showFocusButton = !task.completed && (riskLevel === "High" || riskLevel === "Critical");
 
     const handleCheckboxChange = async () => {
       const nextCompleted = !task.completed;
@@ -143,6 +149,11 @@ export default function TaskList({
       } else {
         await onToggleTask(task.id!, task.completed);
       }
+    };
+
+    const handleStartFocus = (e: React.MouseEvent) => {
+      e.stopPropagation();
+      setFocusTask({ task, riskLevel });
     };
 
     return (
@@ -229,8 +240,19 @@ export default function TaskList({
           )}
         </div>
 
-        {/* Col 3: Tags row (Priority + Countdown + Procrastination Flag) */}
+        {/* Col 3: Tags row (Priority + Countdown + Procrastination Flag + Risk Chip) */}
         <div className="flex-shrink-0 flex items-center gap-2 mr-4">
+          {/* Risk Chip */}
+          {!task.completed && riskLevel !== "Low" && (
+            <span className={`text-[11px] font-semibold border rounded-[4px] px-2 py-0.5 uppercase tracking-wide select-none ${
+              riskLevel === "Critical" ? "bg-red-600 text-white border-red-700" :
+              riskLevel === "High" ? "bg-orange-500 text-white border-orange-600" :
+              "bg-yellow-100 text-yellow-800 border-yellow-200"
+            }`}>
+              {riskLevel} Risk
+            </span>
+          )}
+
           {/* Priority tag */}
           <span className={`text-[11px] font-medium border rounded-[4px] px-2 py-0.5 uppercase tracking-wide select-none ${priorityClass}`}>
             {task.priority || "medium"}
@@ -273,8 +295,17 @@ export default function TaskList({
           )}
         </div>
 
-        {/* Col 4: Sync Indicator + Date / Delete */}
+        {/* Col 4: Sync Indicator + Date / Delete / Focus Mode */}
         <div className="w-[140px] flex items-center justify-end gap-2 text-right">
+          {showFocusButton && (
+            <button
+              onClick={handleStartFocus}
+              className="hidden group-hover:flex items-center gap-1 bg-zinc-900 text-white text-[11px] font-medium px-2 py-1 rounded-[4px] mr-1"
+            >
+              <Target className="w-3 h-3" /> Focus
+            </button>
+          )}
+
           {/* Sync Indicator */}
           {typeof window !== 'undefined' && localStorage.getItem('stride_gcal_token') && task.deadline && !task.completed && (
             <div className="flex items-center justify-center w-[14px] flex-shrink-0">
@@ -419,7 +450,7 @@ export default function TaskList({
                 {/* Task items inside the group */}
                 <div className="flex flex-col">
                   <AnimatePresence initial={false}>
-                    {groupTasks.map((task) => renderTaskRow(task))}
+                    {groupTasks.map((task) => renderTaskRow(task, groupTasks))}
                   </AnimatePresence>
                 </div>
               </div>
@@ -440,6 +471,22 @@ export default function TaskList({
             </div>
           )}
         </div>
+      )}
+
+      {focusTask && (
+        <FocusModeModal
+          task={focusTask.task}
+          riskLevel={focusTask.riskLevel}
+          onClose={() => setFocusTask(null)}
+          onMarkDone={async (id) => {
+            await onToggleTask(id, false);
+            setFocusTask(null);
+          }}
+          onDelay={async (id, date) => {
+            await onUpdateDeadline(id, date);
+            setFocusTask(null);
+          }}
+        />
       )}
     </div>
   );

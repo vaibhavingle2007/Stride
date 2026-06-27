@@ -120,7 +120,7 @@ export default function Home({ onSignedIn }: HomeProps) {
         <section className="mb-20 text-left border-y border-zinc-200 py-10">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div>
-              <div className="text-[32px] font-light text-zinc-900 mb-1">9+</div>
+              <div className="text-[32px] font-light text-zinc-900 mb-1">13+</div>
               <div className="text-[13px] text-zinc-500">AI agents working in the background for you</div>
             </div>
             <div>
@@ -299,7 +299,7 @@ export default function Home({ onSignedIn }: HomeProps) {
                 EVERYTHING STRIDE DOES
               </div>
               <h2 className="text-[28px] font-normal text-zinc-900 leading-[1.25]">
-                9 AI features. One calm interface.
+                13 AI features. One calm interface.
               </h2>
             </div>
 
@@ -396,6 +396,42 @@ export default function Home({ onSignedIn }: HomeProps) {
                 </p>
               </div>
 
+              {/* Feature 11 */}
+              <div className="border-t border-zinc-200 py-5">
+                <h4 className="text-[15px] font-medium text-zinc-900 mb-1">Predictive Risk Assessment Engine</h4>
+                <p className="text-[14px] text-zinc-500 leading-[1.6]">
+                  Analyzes your workload to foresee missed deadlines. 
+                  It alerts you proactively before you are overwhelmed.
+                </p>
+              </div>
+
+              {/* Feature 12 */}
+              <div className="border-t border-zinc-200 py-5">
+                <h4 className="text-[15px] font-medium text-zinc-900 mb-1">Visual Risk Indicators</h4>
+                <p className="text-[14px] text-zinc-500 leading-[1.6]">
+                  Highlights tasks that are at risk of being delayed with intuitive visual 
+                  tags to keep your focus on what needs immediate attention.
+                </p>
+              </div>
+
+              {/* Feature 13 */}
+              <div className="border-t border-zinc-200 py-5">
+                <h4 className="text-[15px] font-medium text-zinc-900 mb-1">AI-Powered Micro-Steps & Context</h4>
+                <p className="text-[14px] text-zinc-500 leading-[1.6]">
+                  Breaks down large, daunting tasks into bite-sized, achievable micro-steps, 
+                  automatically adding necessary context and resources.
+                </p>
+              </div>
+
+              {/* Feature 14 */}
+              <div className="border-t border-zinc-200 py-5">
+                <h4 className="text-[15px] font-medium text-zinc-900 mb-1">Integrated Timer & Actions</h4>
+                <p className="text-[14px] text-zinc-500 leading-[1.6]">
+                  Stay in the zone with built-in focus timers and swift actions 
+                  directly linked to your active tasks.
+                </p>
+              </div>
+
             </div>
 
           </div>
@@ -473,8 +509,12 @@ export default function Home({ onSignedIn }: HomeProps) {
       {/* FOOTER */}
       <footer className="border-t border-zinc-200 bg-white py-7 transition-all duration-150">
         <div className="max-w-[1280px] mx-auto px-12 flex flex-col sm:flex-row justify-between items-center gap-4">
-          <div className="text-[13px] text-zinc-400">
-            Stride · © 2026 · Built for Vibe2Ship Hackathon
+          <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 text-[13px] text-zinc-400">
+            <span>Stride · © 2026 · Built for Vibe2Ship Hackathon</span>
+            <div className="flex gap-4">
+              <a href="/privacy" className="hover:text-zinc-600 transition-colors">Privacy Policy</a>
+              <a href="/terms" className="hover:text-zinc-600 transition-colors">Terms of Service</a>
+            </div>
           </div>
           <div className="text-[13px] text-zinc-400">
             Gemini 3.5 Flash · Firebase · Google AI Studio

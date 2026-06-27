@@ -17,7 +17,6 @@ interface AnalyticsProps {
 
 export default function Analytics({ user, onSignOut }: AnalyticsProps) {
   const [tasks, setTasks] = useState<Task[]>([]);
-  const [streak, setStreak] = useState(0);
   const [insight, setInsight] = useState<string>("");
   const [loadingInsight, setLoadingInsight] = useState(false);
   const [insightFetched, setInsightFetched] = useState(false);
@@ -46,21 +45,6 @@ export default function Analytics({ user, onSignOut }: AnalyticsProps) {
     });
     return () => unsubscribe();
   }, [user]);
-
-  // Streak calculations
-  useEffect(() => {
-    let streakMap = {};
-    try {
-      const rawStreak = localStorage.getItem("stride_streak");
-      streakMap = rawStreak ? JSON.parse(rawStreak) : {};
-    } catch (e) {
-      console.error("Corrupted local storage stride_streak parsing fallback", e);
-    }
-
-    const todayStr = getLocalDateString();
-    const count = calculateStreak(streakMap, todayStr);
-    setStreak(count);
-  }, [tasks]);
 
   // 1. Completion Rate calculation
   const totalCount = tasks.length;
@@ -180,7 +164,7 @@ export default function Analytics({ user, onSignOut }: AnalyticsProps) {
         body: JSON.stringify({
           tasks: tasks.map(t => ({ name: t.name, priority: t.priority, deadline: t.deadline, completed: t.completed })),
           completedThisWeek: completedThisWeekCount,
-          streak: streak,
+          streak: onTimeStreak,
           rate: completionRate,
           today: todayStr
         })
@@ -250,10 +234,10 @@ export default function Analytics({ user, onSignOut }: AnalyticsProps) {
                 Streak Status
               </span>
               <div className="text-[32px] font-normal text-zinc-900 leading-none py-1 font-sans">
-                {streak} {streak === 1 ? "day" : "days"}
+                {onTimeStreak} {onTimeStreak === 1 ? "day" : "days"}
               </div>
               <span className="text-[12px] text-zinc-450 mt-1 block">
-                Maintain your daily streak
+                Maintain your on-time completion streak
               </span>
             </div>
 

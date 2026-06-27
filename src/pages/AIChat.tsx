@@ -7,7 +7,7 @@ import { Task } from "../lib/gemini";
 import Header from "../components/Header";
 import Navigation from "../components/Navigation";
 import { motion } from "motion/react";
-import { calculateStreak, calculateScore, getLocalDateString } from "../lib/productivity";
+import { calculateStreak, calculateScore, getLocalDateString, calculateOnTimeStreak } from "../lib/productivity";
 
 interface AIChatProps {
   user: User;
@@ -61,16 +61,8 @@ export default function AIChat({ user, onSignOut }: AIChatProps) {
 
   // Streak & Score calculations to send context to Gemini
   useEffect(() => {
-    let streakMap = {};
-    try {
-      const rawStreak = localStorage.getItem("stride_streak");
-      streakMap = rawStreak ? JSON.parse(rawStreak) : {};
-    } catch (e) {
-      console.error("Corrupted local storage stride_streak parsing fallback", e);
-    }
-
     const todayStr = getLocalDateString();
-    const streakDays = calculateStreak(streakMap, todayStr);
+    const streakDays = calculateOnTimeStreak(tasks, todayStr);
     setStreak(streakDays);
 
     const calculatedScore = calculateScore(tasks, streakDays, todayStr);

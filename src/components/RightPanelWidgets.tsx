@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Task, AIScheduleBlock } from "../lib/gemini";
 import { ActivityEntry, logActivity } from "../lib/activity";
 import CalendarSync from "./CalendarSync";
-import { calculateStreak, calculateScore, getLocalDateString } from "../lib/productivity";
+import { calculateStreak, calculateScore, getLocalDateString, calculateOnTimeStreak } from "../lib/productivity";
 import { auth, googleProvider, db } from "../lib/firebase";
 import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 import { createCalendarEvent } from "../lib/calendarService";
@@ -83,7 +83,6 @@ export default function RightPanelWidgets({ tasks, scheduleFromAi, userId }: Rig
     setTimeout(() => setShowBulkSync(false), 3000);
   };
   const [editingBlocks, setEditingBlocks] = useState<AIScheduleBlock[]>([]);
-  const [streakMap, setStreakMap] = useState<Record<string, boolean>>({});
   const [score, setScore] = useState(0);
   const [percentChange, setPercentChange] = useState(0);
 
@@ -94,7 +93,7 @@ export default function RightPanelWidgets({ tasks, scheduleFromAi, userId }: Rig
     return getLocalDateString(date);
   }
 
-  // Load activities, streaks, schedule, and score on mount/update
+  // Load activities, schedule, and score on mount/update
   useEffect(() => {
     const handleStorageChange = () => {
       // 1. Loading Activity Feed
@@ -104,15 +103,6 @@ export default function RightPanelWidgets({ tasks, scheduleFromAi, userId }: Rig
       } catch (e) {
         console.error("Corrupted local storage stride_activity parsing fallback", e);
         setActivities([]);
-      }
-
-      // 2. Loading Streak Map
-      try {
-        const rawStreak = localStorage.getItem("stride_streak");
-        setStreakMap(rawStreak ? JSON.parse(rawStreak) : {});
-      } catch (e) {
-        console.error("Corrupted local storage stride_streak parsing fallback", e);
-        setStreakMap({});
       }
     };
 
@@ -138,33 +128,10 @@ export default function RightPanelWidgets({ tasks, scheduleFromAi, userId }: Rig
     }
   }, [scheduleFromAi]);
 
-  // Streak auto-logger: mark today as complete when at least 1 task is completed
-  useEffect(() => {
-    const todayStr = getLocalDateString();
-    const hasCompletedToday = tasks.some(t => t.completed); // general completed tasks existing
-    
-    if (hasCompletedToday) {
-      let current: Record<string, boolean> = {};
-      try {
-        const rawStreak = localStorage.getItem("stride_streak");
-        current = rawStreak ? JSON.parse(rawStreak) : {};
-      } catch (e) {
-        console.error("Corrupted local storage stride_streak auto-logger parsing fallback", e);
-      }
-
-      if (!current[todayStr]) {
-        current[todayStr] = true;
-        localStorage.setItem("stride_streak", JSON.stringify(current));
-        setStreakMap(current);
-        window.dispatchEvent(new Event("storage"));
-      }
-    }
-  }, [tasks]);
-
   // Score Calculation React Block
   useEffect(() => {
     // Streak count computation
-    const streakDays = calculateStreak(streakMap, todayStr);
+    const streakDays = calculateOnTimeStreak(tasks, todayStr);
 
     // Cumulative Score
     const newScore = calculateScore(tasks, streakDays, todayStr);
@@ -179,7 +146,7 @@ export default function RightPanelWidgets({ tasks, scheduleFromAi, userId }: Rig
     const diff = newScore - yesterdayScore;
     
     setPercentChange(diff);
-  }, [tasks, streakMap, todayStr, yesterdayStr]);
+  }, [tasks, todayStr, yesterdayStr]);
 
   // --- Logic Helpers ---
 
@@ -370,7 +337,12 @@ export default function RightPanelWidgets({ tasks, scheduleFromAi, userId }: Rig
         <div className="flex items-center gap-1.5 mb-3.5">
           {currentWeekDays.map((dt, idx) => {
             const dateStr = dt.toISOString().split("T")[0];
-            const isCompleted = !!streakMap[dateStr];
+            const isCompleted = tasks.some(t => {
+              if (!t.completed) return false;
+              // Check if completed on this date
+              const completionDate = t.completedAt || t.deadline || todayStr;
+              return completionDate === dateStr;
+            });
             const isToday = dateStr === todayStr;
 
             let circleClass = "";
@@ -398,7 +370,7 @@ export default function RightPanelWidgets({ tasks, scheduleFromAi, userId }: Rig
           })}
         </div>
         <span className="text-[13px] text-zinc-500 font-normal font-sans">
-          Current streak: {calculateStreak(streakMap, todayStr)} days
+          Current streak: {calculateOnTimeStreak(tasks, todayStr)} days
         </span>
       </div>
 
