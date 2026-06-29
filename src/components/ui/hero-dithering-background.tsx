@@ -21,12 +21,16 @@ export function HeroDitheringBackground({ children }: { children: React.ReactNod
   }, [])
 
   if (isMobile) {
-    return <div className="relative w-full">{children}</div>
+    return <div className="relative w-screen flex flex-col items-center justify-center min-h-[calc(100vh-52px)]" style={{ marginLeft: "calc(-50vw + 50%)" }}>
+      <div className="relative z-10 w-full max-w-[1280px] mx-auto px-12">
+        {children}
+      </div>
+    </div>
   }
 
   return (
     <div
-      className="relative overflow-hidden w-screen"
+      className="relative overflow-hidden w-screen flex flex-col items-center justify-center min-h-[calc(100vh-52px)]"
       style={{ marginLeft: "calc(-50vw + 50%)" }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}

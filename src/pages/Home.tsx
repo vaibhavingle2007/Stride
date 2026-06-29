@@ -65,7 +65,7 @@ export default function Home({ onSignedIn }: HomeProps) {
         {/* HERO SECTION */}
         <div className="relative w-full overflow-hidden">
           <HeroDitheringBackground>
-          <section id="stride-hero" className="pt-24 pb-20 max-w-[680px] text-left">
+          <section id="stride-hero" className="py-12 max-w-[800px] mx-auto flex flex-col items-center text-center">
             
             {/* Eyebrow Label */}
             <div className="text-[11px] font-bold text-zinc-450 uppercase tracking-widest mb-4">
