@@ -110,8 +110,10 @@ export function calculateOnTimeStreak(tasks: Task[], todayStr: string): number {
   const onTimeMap: Record<string, boolean> = {};
   tasks.forEach((t) => {
     if (isOnTime(t)) {
-      const dateKey = t.completedAt || t.deadline || todayStr;
-      onTimeMap[dateKey] = true;
+      const dateKey = t.completedAt || t.deadline;
+      if (dateKey) {
+        onTimeMap[dateKey] = true;
+      }
     }
   });
   return calculateStreak(onTimeMap, todayStr);

@@ -257,6 +257,74 @@ async function startServer() {
   app.use(express.json({ limit: '50mb' }));
   app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
+  // API Route: I'm Overwhelmed (Triage Tasks)
+  app.post("/api/overwhelmed", async (req, res) => {
+    try {
+      const { tasks } = req.body;
+      if (!tasks || !Array.isArray(tasks) || tasks.length === 0) {
+        return res.status(400).json({ error: "Tasks array is required and cannot be empty." });
+      }
+
+      const apiKey = process.env.GEMINI_API_KEY;
+      if (!apiKey) {
+        return res.status(500).json({ 
+          error: "GEMINI_API_KEY is not configured on the server. Please define it in your Secrets panel inside Google AI Studio." 
+        });
+      }
+
+      const ai = new GoogleGenAI({
+        apiKey,
+        httpOptions: {
+          headers: {
+            "User-Agent": "aistudio-build"
+          }
+        }
+      });
+
+      const prompt = `The user feels overwhelmed. From their active tasks, return the 3 that truly matter today, 1 thing to start right now, and up to 2 tasks safe to defer (with a new suggested date). Calm, direct, second-person. JSON only.
+
+You will be provided a list of user tasks: Each task has an "id" (string), "name", "deadline" (YYYY-MM-DD), "priority" (high, medium, or low), and "description".
+
+Please analyze these tasks and respond with a structured JSON object containing:
+1. "prioritized_tasks": An array of the top 3 tasks that truly matter today. Each containing:
+   - "id" (string, exact id from the input)
+   - "name" (string)
+   - "reason" (string, clear, calm, direct 1-sentence explanation of why this matters today).
+2. "do_now": An object for the direct, urgent action to commence immediately:
+   - "id" (string, exact id from the input)
+   - "task_name" (string, single most impactful task name to start right now)
+   - "reason" (string, calm, direct 1-2 sentence motivating instruction).
+3. "safe_to_defer": An array of up to 2 tasks safe to defer. Each containing:
+   - "id" (string, exact id from the input)
+   - "task_name" (string)
+   - "suggested_date" (string, YYYY-MM-DD, a reasonable new deadline in the future)
+   - "reason" (string, a calm explanation of why it is safe to push this back).
+
+Here is the list of user tasks, parsed for your review:
+${JSON.stringify(tasks, null, 2)}
+
+Respond ONLY with a valid JSON document conforming to this exact structure. Do not include markdown formatting or wrapper block quotes like \`\`\`json.`;
+
+      const response = await generateContentWithFallback(ai, "gemini-3.1-flash-lite", prompt, {
+        responseMimeType: "application/json"
+      });
+
+      const responseText = response.text;
+      if (!responseText) {
+        throw new Error("Empty response received from AI model.");
+      }
+
+      const parsedResult = extractJson(responseText);
+      return res.json(parsedResult);
+    } catch (error: any) {
+      console.error("[POST /api/overwhelmed] Error analyzing tasks:", error);
+      return res.status(500).json({ 
+        error: "Failed to perform overwhelm triage.",
+        details: error.message || error
+      });
+    }
+  });
+
   // API Route: Analyze Tasks using Gemini 3.1 Flash Lite
   app.post("/api/analyze", async (req, res) => {
     try {
@@ -658,14 +726,29 @@ items are still pending. Focus on 'Submit Vibe2Ship' first — it's due in 6 day
         console.warn("[Google Calendar Callback] Google did not return a refresh token. Using existing if present.");
       }
 
-      // Save/merge tokens in calendar_connections/{uid} (Bypassing server-side DB write since server lacks IAM write permissions)
+      // Save/merge tokens in calendar_connections/{uid} 
       const tokenPayload = {
         refreshToken: tokens.refresh_token || "",
         accessToken: tokens.access_token || "",
         expiryDate: tokens.expiry_date || 0,
         calendarId: "primary",
-        syncEnabled: true
+        syncEnabled: true,
+        lastSyncAt: new Date().toISOString()
       };
+
+      try {
+        await adminDb.collection("calendar_connections").doc(uid).set(tokenPayload, { merge: true });
+      } catch (err) {
+        console.error("Failed to save tokens server-side:", err);
+      }
+
+      let targetOrigin = process.env.APP_URL || "";
+      if (!targetOrigin || targetOrigin === "MY_APP_URL") {
+        const protocol = req.headers["x-forwarded-proto"] || req.protocol || "http";
+        const host = req.get("host");
+        targetOrigin = `${protocol}://${host}`;
+      }
+      if (targetOrigin.endsWith('/')) targetOrigin = targetOrigin.slice(0, -1);
 
       // Return a simple HTML snippet to communicate with the parent window in iframe-safe manner
       return res.send(`
@@ -674,9 +757,8 @@ items are still pending. Focus on 'Submit Vibe2Ship' first — it's due in 6 day
             <script>
               if (window.opener) {
                 window.opener.postMessage({ 
-                  type: 'CALENDAR_AUTH_SUCCESS', 
-                  tokens: ${JSON.stringify(tokenPayload)} 
-                }, '*');
+                  type: 'CALENDAR_AUTH_SUCCESS'
+                }, '${targetOrigin}');
                 window.close();
               } else {
                 window.location.href = '/';
@@ -721,6 +803,21 @@ items are still pending. Focus on 'Submit Vibe2Ship' first — it's due in 6 day
 
   // 4. GET /api/calendar/status?uid=... -> { connected:boolean, lastSyncAt, calendarId }
   app.get("/api/calendar/status", async (req, res) => {
+    try {
+      const { uid, refreshToken } = req.query;
+      if (!uid || typeof uid !== "string") {
+        return res.json({ connected: false });
+      }
+      if (refreshToken && typeof refreshToken === "string" && refreshToken.trim() !== "") {
+        return res.json({
+          connected: true,
+          lastSyncAt: new Date().toISOString(),
+          calendarId: "primary"
+        });
+      }
+    } catch (e) {
+      console.warn("Failed to check status", e);
+    }
     return res.json({ connected: false });
   });
 

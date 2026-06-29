@@ -22,6 +22,9 @@ import { logActivity } from "../lib/activity";
 import RightPanelWidgets from "../components/RightPanelWidgets";
 import SmartNudgeBanner from "../components/SmartNudgeBanner";
 import { getLocalDateString } from "../lib/productivity";
+import { getStatus } from "../lib/calendar";
+import confetti from "canvas-confetti";
+import OverwhelmModal from "../components/OverwhelmModal";
 
 interface DashboardProps {
   user: User;
@@ -43,6 +46,8 @@ export default function Dashboard({ user, onSignOut }: DashboardProps) {
     move_to: string;
     reason: string;
   } | null>(null);
+
+  const [isOverwhelmedOpen, setIsOverwhelmedOpen] = useState(false);
 
   // Ref to track prevTasks for changes
   const prevTasksRef = useRef<Task[]>([]);
@@ -255,17 +260,14 @@ export default function Dashboard({ user, onSignOut }: DashboardProps) {
     if (hasTaskChanges) {
       calendarSyncTimeout = setTimeout(async () => {
         try {
-          const statusRes = await fetch(`/api/calendar/status?uid=${encodeURIComponent(user.uid)}`);
-          if (statusRes.ok) {
-            const status = await statusRes.json();
-            if (status.connected) {
-              console.log("Triggering debounced calendar sync on task update...");
-              await fetch("/api/calendar/sync", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ uid: user.uid })
-              });
-            }
+          const status = await getStatus(user.uid);
+          if (status && status.connected) {
+            console.log("Triggering debounced calendar sync on task update...");
+            await fetch("/api/calendar/sync", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ uid: user.uid })
+            });
           }
         } catch (err) {
           console.warn("Silent background calendar auto-sync failed:", err);
@@ -291,15 +293,6 @@ export default function Dashboard({ user, onSignOut }: DashboardProps) {
         deadline_changes: 0,
         original_deadline: taskData.deadline || ""
       });
-      const newTask = { id: docRef.id, ...taskData, priority: taskData.priority || 'medium' };
-      if (typeof window !== 'undefined' && localStorage.getItem('stride_gcal_token') && newTask.deadline) {
-        import('../lib/calendarService').then(async ({ createCalendarEvent }) => {
-          const googleEventId = await createCalendarEvent(newTask);
-          if (googleEventId) {
-            await updateDoc(docRef, { googleEventId });
-          }
-        });
-      }
     } catch (e) {
       handleFirestoreError(e, OperationType.CREATE, "tasks");
       throw e;
@@ -311,7 +304,7 @@ export default function Dashboard({ user, onSignOut }: DashboardProps) {
     if (!user) return;
     try {
       for (const t of newTasks) {
-        const docRef = await addDoc(collection(db, "tasks"), {
+        await addDoc(collection(db, "tasks"), {
           ...t,
           completed: false,
           userId: user.uid,
@@ -319,15 +312,6 @@ export default function Dashboard({ user, onSignOut }: DashboardProps) {
           deadline_changes: 0,
           original_deadline: t.deadline || ""
         });
-        const newTask = { id: docRef.id, ...t, priority: t.priority || 'medium' };
-        if (typeof window !== 'undefined' && localStorage.getItem('stride_gcal_token') && newTask.deadline) {
-          import('../lib/calendarService').then(async ({ createCalendarEvent }) => {
-            const googleEventId = await createCalendarEvent(newTask);
-            if (googleEventId) {
-              await updateDoc(docRef, { googleEventId });
-            }
-          });
-        }
       }
       logActivity("braindump", `Extracted and synchronized ${newTasks.length} tasks via Brain Dump`);
     } catch (e) {
@@ -344,15 +328,12 @@ export default function Dashboard({ user, onSignOut }: DashboardProps) {
         completed: isCompleting,
         completedAt: isCompleting ? getLocalDateString() : null
       });
-      const task = tasks.find(t => t.id === taskId);
-      if (task?.googleEventId && typeof window !== 'undefined' && localStorage.getItem('stride_gcal_token')) {
-        import('../lib/calendarService').then(({ completeCalendarEvent, updateCalendarEvent }) => {
-          if (isCompleting) {
-            completeCalendarEvent(task, task.googleEventId as string);
-          } else {
-            updateCalendarEvent(task, task.googleEventId as string);
-          }
-        });
+
+      if (isCompleting) {
+        const task = tasks.find(t => t.id === taskId);
+        if (task && task.priority === "high") {
+          confetti({ particleCount: 90, spread: 70, origin: { y: 0.7 }, scalar: 0.9 });
+        }
       }
     } catch (e) {
       handleFirestoreError(e, OperationType.UPDATE, `tasks/${taskId}`);
@@ -375,20 +356,6 @@ export default function Dashboard({ user, onSignOut }: DashboardProps) {
         deadline_changes: changesCount,
         original_deadline: originalDeadline
       });
-      
-      const updatedTask = { ...task, deadline: newDeadline };
-      if (typeof window !== 'undefined' && localStorage.getItem('stride_gcal_token')) {
-        import('../lib/calendarService').then(async ({ updateCalendarEvent, createCalendarEvent }) => {
-          if (updatedTask.googleEventId) {
-            await updateCalendarEvent(updatedTask, updatedTask.googleEventId);
-          } else if (newDeadline) {
-            const googleEventId = await createCalendarEvent(updatedTask);
-            if (googleEventId) {
-              await updateDoc(taskRef, { googleEventId });
-            }
-          }
-        });
-      }
     } catch (e) {
       handleFirestoreError(e, OperationType.UPDATE, `tasks/${taskId}`);
     }
@@ -397,12 +364,6 @@ export default function Dashboard({ user, onSignOut }: DashboardProps) {
   // 4. Delete Action
   const handleDeleteTask = async (taskId: string) => {
     try {
-      const task = tasks.find(t => t.id === taskId);
-      if (task?.googleEventId && typeof window !== 'undefined' && localStorage.getItem('stride_gcal_token')) {
-        import('../lib/calendarService').then(({ deleteCalendarEvent }) => {
-          deleteCalendarEvent(task.googleEventId as string);
-        });
-      }
       const taskRef = doc(db, "tasks", taskId);
       await deleteDoc(taskRef);
     } catch (e) {
@@ -474,6 +435,15 @@ export default function Dashboard({ user, onSignOut }: DashboardProps) {
         {/* Widget 6: Smart Nudge Banner (Full-width, above core columns) */}
         <SmartNudgeBanner tasks={tasks} />
 
+        <div className="flex justify-end w-full mb-[-12px]">
+          <button
+            onClick={() => setIsOverwhelmedOpen(true)}
+            className="flex items-center gap-2 bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 text-[12px] font-medium py-1.5 px-3 rounded-[6px] transition-colors"
+          >
+            🚨 I&apos;m Overwhelmed
+          </button>
+        </div>
+
         <div className="flex flex-col lg:flex-row gap-8 w-full items-start">
           
           {/* Main task area: flex-grow */}
@@ -530,6 +500,13 @@ export default function Dashboard({ user, onSignOut }: DashboardProps) {
           {toastMessage}
         </div>
       )}
+
+      <OverwhelmModal
+        isOpen={isOverwhelmedOpen}
+        onClose={() => setIsOverwhelmedOpen(false)}
+        tasks={tasks}
+        onUpdateDeadline={handleUpdateDeadline}
+      />
 
     </div>
   );

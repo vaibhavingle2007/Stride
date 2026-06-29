@@ -219,17 +219,6 @@ export default function SnapAndPlan({ user, onSignOut }: SnapAndPlanProps) {
         });
         
         saved++;
-
-        // Add to calendar if token exists
-        if (typeof window !== 'undefined' && localStorage.getItem('stride_gcal_token') && t.deadline) {
-          const newTask = { id: docRef.id, ...t, priority: t.priority || 'medium' };
-          import('../lib/calendarService').then(async ({ createCalendarEvent }) => {
-            const googleEventId = await createCalendarEvent(newTask as any);
-            if (googleEventId) {
-              await updateDoc(docRef, { googleEventId });
-            }
-          });
-        }
       }
 
       logActivity("snap", `Added ${saved} tasks via Snap & Plan`);

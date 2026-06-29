@@ -126,7 +126,7 @@ export default function Home({ onSignedIn }: HomeProps) {
         <section className="relative z-10 mb-20 text-left border-y border-zinc-200 py-10">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div>
-              <div className="text-[32px] font-light text-zinc-900 mb-1">13+</div>
+              <div className="text-[32px] font-light text-zinc-900 mb-1">14+</div>
               <div className="text-[13px] text-zinc-500">AI agents working in the background for you</div>
             </div>
             <div>
@@ -305,13 +305,23 @@ export default function Home({ onSignedIn }: HomeProps) {
                 EVERYTHING STRIDE DOES
               </div>
               <h2 className="text-[28px] font-normal text-zinc-900 leading-[1.25]">
-                13 AI features. One calm interface.
+                14 AI features. One calm interface.
               </h2>
             </div>
 
             {/* Feature descriptions Right (60% columns) */}
             <div className="md:col-span-6 flex flex-col">
               
+              {/* Feature 0 */}
+              <div className="border-t border-zinc-200 py-5">
+                <h4 className="text-[15px] font-medium text-zinc-900 mb-1">One-Tap Overwhelm Triage</h4>
+                <p className="text-[14px] text-zinc-500 leading-[1.6]">
+                  Feeling buried? Hit one button and Gemini instantly cuts your workload down to the single
+                  task to start now, the three that truly matter today, and what's safe to push — reschedule
+                  any of them in a click.
+                </p>
+              </div>
+
               {/* Feature 1 */}
               <div className="border-t border-zinc-200 py-5">
                 <h4 className="text-[15px] font-medium text-zinc-900 mb-1">Brain Dump → Tasks</h4>

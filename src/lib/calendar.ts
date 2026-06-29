@@ -62,6 +62,23 @@ export async function getStatus(uid: string): Promise<CalendarStatus> {
     if (!data || !data.refreshToken) {
       return { connected: false };
     }
+    
+    try {
+      const res = await fetch(`/api/calendar/status?uid=${uid}&refreshToken=${encodeURIComponent(data.refreshToken)}`);
+      if (res.ok) {
+        const serverData = await res.json();
+        if (serverData.connected) {
+          return {
+            connected: true,
+            lastSyncAt: data.lastSyncAt || serverData.lastSyncAt || null,
+            calendarId: data.calendarId || "primary"
+          };
+        }
+      }
+    } catch(e) {
+      console.warn("Server status check failed, falling back to local");
+    }
+
     return {
       connected: true,
       lastSyncAt: data.lastSyncAt || null,

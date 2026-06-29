@@ -3,10 +3,6 @@ import { Task, AIScheduleBlock } from "../lib/gemini";
 import { ActivityEntry, logActivity } from "../lib/activity";
 import CalendarSync from "./CalendarSync";
 import { calculateStreak, calculateScore, getLocalDateString, calculateOnTimeStreak } from "../lib/productivity";
-import { auth, googleProvider, db } from "../lib/firebase";
-import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
-import { createCalendarEvent } from "../lib/calendarService";
-import { doc, updateDoc } from "firebase/firestore";
 
 interface RightPanelWidgetsProps {
   tasks: Task[];
@@ -23,65 +19,6 @@ export default function RightPanelWidgets({ tasks, scheduleFromAi, userId }: Rig
   const [schedule, setSchedule] = useState<AIScheduleBlock[]>([]);
   const [isEditingPlan, setIsEditingPlan] = useState(false);
   
-  // Calendar State
-  const [isConnected, setIsConnected] = useState(false);
-  const [showBulkSync, setShowBulkSync] = useState(false);
-  const [bulkSyncProgress, setBulkSyncProgress] = useState("");
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      setIsConnected(!!localStorage.getItem('stride_gcal_token'));
-    }
-  }, []);
-
-  const handleConnectCalendar = async () => {
-    try {
-      const provider = new GoogleAuthProvider();
-      provider.addScope('https://www.googleapis.com/auth/calendar.events');
-      provider.addScope('https://www.googleapis.com/auth/calendar.readonly');
-      const result = await signInWithPopup(auth, provider);
-      const credential = GoogleAuthProvider.credentialFromResult(result);
-      if (credential?.accessToken) {
-        const wasConnected = !!localStorage.getItem('stride_gcal_token');
-        localStorage.setItem('stride_gcal_token', credential.accessToken);
-        setIsConnected(true);
-        if (!wasConnected) {
-          setShowBulkSync(true);
-        }
-      }
-    } catch (e) {
-      console.error("Google Calendar connection failed", e);
-    }
-  };
-
-  const handleDisconnectCalendar = () => {
-    localStorage.removeItem('stride_gcal_token');
-    setIsConnected(false);
-    setShowBulkSync(false);
-  };
-
-  const handleBulkSync = async () => {
-    const incompleteTasks = tasks.filter(t => !t.completed && t.deadline && !t.googleEventId);
-    if (incompleteTasks.length === 0) {
-      setBulkSyncProgress(`✓ 0 tasks to sync`);
-      setTimeout(() => setShowBulkSync(false), 3000);
-      return;
-    }
-    
-    let count = 0;
-    for (const t of incompleteTasks) {
-      setBulkSyncProgress(`Syncing ${count + 1} of ${incompleteTasks.length} tasks...`);
-      const googleEventId = await createCalendarEvent(t);
-      if (googleEventId && t.id) {
-        const taskRef = doc(db, "tasks", t.id);
-        await updateDoc(taskRef, { googleEventId });
-      }
-      count++;
-    }
-    
-    setBulkSyncProgress(`✓ ${count} tasks synced to Google Calendar`);
-    setTimeout(() => setShowBulkSync(false), 3000);
-  };
   const [editingBlocks, setEditingBlocks] = useState<AIScheduleBlock[]>([]);
   const [score, setScore] = useState(0);
   const [percentChange, setPercentChange] = useState(0);
@@ -336,13 +273,8 @@ export default function RightPanelWidgets({ tasks, scheduleFromAi, userId }: Rig
         </span>
         <div className="flex items-center gap-1.5 mb-3.5">
           {currentWeekDays.map((dt, idx) => {
-            const dateStr = dt.toISOString().split("T")[0];
-            const isCompleted = tasks.some(t => {
-              if (!t.completed) return false;
-              // Check if completed on this date
-              const completionDate = t.completedAt || t.deadline || todayStr;
-              return completionDate === dateStr;
-            });
+            const dateStr = getLocalDateString(dt);
+            const isCompleted = tasks.some(t => t.completed && t.completedAt === dateStr);
             const isToday = dateStr === todayStr;
 
             let circleClass = "";

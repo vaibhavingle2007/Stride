@@ -6,6 +6,7 @@ import { db } from "../lib/firebase";
 import { doc, updateDoc } from "firebase/firestore";
 import { calculateRiskLevel, RiskLevel } from "../lib/risk";
 import FocusModeModal from "./FocusModeModal";
+import { getLocalDateString } from "../lib/productivity";
 
 interface TaskListProps {
   tasks: Task[];
@@ -26,48 +27,34 @@ interface TaskListProps {
 
 export interface CountdownInfo {
   label: string;
-  tier: "overdue" | "soon" | "normal";
+  className: string;
 }
 
-export function getCountdown(deadline: string): CountdownInfo {
+export function getCountdown(deadline: string): CountdownInfo | null {
   if (!deadline) {
-    return { label: "", tier: "normal" };
+    return null;
   }
 
-  const parts = deadline.split("-");
-  if (parts.length !== 3) {
-    return { label: "", tier: "normal" };
-  }
+  const todayStr = getLocalDateString();
+  
+  const parseDate = (dStr: string) => {
+    const [y, m, d] = dStr.split("-").map(Number);
+    return new Date(y, m - 1, d).getTime();
+  };
 
-  const year = parseInt(parts[0], 10);
-  const month = parseInt(parts[1], 10) - 1;
-  const day = parseInt(parts[2], 10);
-
-  // Parse target date in local timezone
-  const deadlineDate = new Date(year, month, day);
-
-  // Get current local date (midnight)
-  const now = new Date();
-  const todayDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-
-  // Difference in days
-  const diffTime = deadlineDate.getTime() - todayDate.getTime();
-  const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+  const todayTime = parseDate(todayStr);
+  const deadlineTime = parseDate(deadline);
+  
+  const diffDays = Math.round((deadlineTime - todayTime) / (1000 * 60 * 60 * 24));
 
   if (diffDays < 0) {
-    const absDays = Math.abs(diffDays);
-    const label = absDays === 1 ? "Overdue" : `Overdue by ${absDays} d`;
-    return { label, tier: "overdue" };
+    return { label: "⚠ Overdue", className: "bg-red-50 text-red-600 border-red-200" };
   } else if (diffDays === 0) {
-    return { label: "Due today", tier: "overdue" };
-  } else if (diffDays === 1) {
-    return { label: "Tomorrow", tier: "soon" };
-  } else if (diffDays >= 2 && diffDays <= 13) {
-    return { label: `${diffDays} days left`, tier: diffDays <= 2 ? "soon" : "normal" };
+    return { label: "🔴 Due today", className: "bg-amber-50 text-amber-700 border-amber-200" };
+  } else if (diffDays >= 1 && diffDays <= 3) {
+    return { label: `⏰ ${diffDays}d left`, className: "bg-orange-50 text-orange-600 border-orange-200" };
   } else {
-    const weeks = Math.floor(diffDays / 7);
-    const label = weeks === 1 ? "1 week left" : `${weeks} weeks left`;
-    return { label, tier: "normal" };
+    return { label: `${diffDays}d left`, className: "bg-zinc-50 text-zinc-400 border-zinc-200" };
   }
 }
 
@@ -262,20 +249,10 @@ export default function TaskList({
           {!task.completed && task.deadline && (
             (() => {
               const countdown = getCountdown(task.deadline);
-              let chipClass = "";
-              if (countdown.tier === "overdue") {
-                chipClass = "bg-[#FEF2F2] text-[#DC2626] border-[#FECACA]";
-              } else if (countdown.tier === "soon") {
-                chipClass = "bg-[#FFF7ED] text-[#C2410C] border-[#FED7AA]";
-              } else {
-                chipClass = "bg-zinc-100 text-zinc-500 border-zinc-200";
-              }
+              if (!countdown) return null;
 
               return (
-                <span className={`inline-flex items-center gap-1 text-[11px] font-medium border rounded-[4px] px-2 py-0.5 uppercase tracking-wide select-none ${chipClass}`}>
-                  {countdown.tier === "overdue" && (
-                    <Clock className="w-3 h-3 flex-shrink-0" />
-                  )}
+                <span className={`inline-flex items-center gap-1 text-[11px] font-medium border rounded-[4px] px-2 py-0.5 uppercase tracking-wide select-none ${countdown.className}`}>
                   {countdown.label}
                 </span>
               );
@@ -306,47 +283,7 @@ export default function TaskList({
             </button>
           )}
 
-          {/* Sync Indicator */}
-          {typeof window !== 'undefined' && localStorage.getItem('stride_gcal_token') && task.deadline && !task.completed && (
-            <div className="flex items-center justify-center w-[14px] flex-shrink-0">
-              {task.googleEventId ? (
-                <CalendarCheck className="w-[14px] h-[14px] text-[#15803D]" />
-              ) : (
-                (() => {
-                  // A tiny inline component for sync state
-                  const SyncIcon = () => {
-                    const [failed, setFailed] = useState(false);
-                    useEffect(() => {
-                      const timer = setTimeout(() => setFailed(true), 3000);
-                      return () => clearTimeout(timer);
-                    }, []);
-                    
-                    if (failed) {
-                      return (
-                        <CalendarX 
-                          className="w-[14px] h-[14px] text-[#C2410C] cursor-pointer" 
-                          title="Calendar sync failed. Tap to retry"
-                          onClick={() => {
-                            setFailed(false);
-                            import('../lib/calendarService').then(async ({ createCalendarEvent }) => {
-                              const googleEventId = await createCalendarEvent(task);
-                              if (googleEventId) {
-                                await updateDoc(doc(db, "tasks", task.id!), { googleEventId });
-                              } else {
-                                setFailed(true);
-                              }
-                            });
-                          }}
-                        />
-                      );
-                    }
-                    return <Loader2 className="w-[14px] h-[14px] text-zinc-400 animate-spin" />;
-                  };
-                  return <SyncIcon />;
-                })()
-              )}
-            </div>
-          )}
+          {/* Sync Indicator removed to rely entirely on server-side flow */}
 
           <div className="group-hover:hidden">
             {task.completed ? (

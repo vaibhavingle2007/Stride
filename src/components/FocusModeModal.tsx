@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { Task } from "../lib/gemini";
 import { RiskLevel } from "../lib/risk";
 
+import { getLocalDateString } from "../lib/productivity";
+
 interface FocusModeModalProps {
   task: Task;
   riskLevel: RiskLevel;
@@ -92,7 +94,7 @@ export default function FocusModeModal({ task, riskLevel, onClose, onMarkDone, o
   const handleDelay = async () => {
     const nextDay = new Date();
     nextDay.setDate(nextDay.getDate() + 1);
-    const dateStr = nextDay.toISOString().split("T")[0];
+    const dateStr = getLocalDateString(nextDay);
     if (task.id) {
       await onDelay(task.id, dateStr);
     }

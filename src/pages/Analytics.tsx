@@ -58,8 +58,10 @@ export default function Analytics({ user, onSignOut }: AnalyticsProps) {
     sevenDaysAgo.setDate(today.getDate() - 7);
 
     return tasks.filter(t => {
-      if (!t.completed || !t.deadline) return false;
-      const tDate = new Date(t.deadline);
+      if (!t.completed) return false;
+      const dateStr = t.completedAt || t.deadline;
+      if (!dateStr) return false;
+      const tDate = new Date(dateStr);
       return tDate >= sevenDaysAgo && tDate <= today;
     }).length;
   };
@@ -70,7 +72,7 @@ export default function Analytics({ user, onSignOut }: AnalyticsProps) {
     const subset = tasks.filter(t => t.priority === prio);
     const total = subset.length;
     const completed = subset.filter(t => t.completed).length;
-    const rate = total === 0 ? 0 : Math.round((completed / total) * 105); // cap at 100 below for render
+    const rate = total === 0 ? 0 : Math.round((completed / total) * 100);
     return {
       total,
       completed,

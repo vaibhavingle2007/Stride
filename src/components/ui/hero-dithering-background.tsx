@@ -1,4 +1,4 @@
-import { useState, Suspense, lazy, useEffect } from "react"
+import React, { useState, Suspense, lazy, useEffect } from "react"
 
 const Dithering = lazy(() =>
   import("@paper-design/shaders-react").then((mod) => ({ 
