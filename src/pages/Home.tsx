@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { signInWithPopup } from "firebase/auth";
 import { auth, googleProvider } from "../lib/firebase";
+import { HeroDitheringBackground } from "../components/ui/hero-dithering-background";
 
 interface HomeProps {
   onSignedIn: () => void;
@@ -59,63 +60,68 @@ export default function Home({ onSignedIn }: HomeProps) {
       </header>
 
       {/* MAIN CONTAINER */}
-      <main className="flex-1 w-full max-w-[1280px] mx-auto px-12">
+      <main className="flex-1 w-full">
         
         {/* HERO SECTION */}
-        <section className="pt-24 pb-20 max-w-[680px] text-left">
-          
-          {/* Eyebrow Label */}
-          <div className="text-[11px] font-bold text-zinc-450 uppercase tracking-widest mb-4">
-            AI-Powered Productivity · Built with AI Studio
-          </div>
-
-          {/* Headline */}
-          <h1 className="text-[52px] font-light text-zinc-900 leading-[1.1] tracking-[-0.03em] mb-5">
-            Stop managing tasks.<br />
-            Start finishing them.
-          </h1>
-
-          {/* Subtext */}
-          <p className="text-[16px] font-normal text-zinc-500 leading-[1.65] max-w-[480px] mb-7">
-            Stride is your AI productivity companion that thinks ahead —
-            extracting tasks from your thoughts, photos, and voice,
-            then building a schedule that actually keeps you on track.
-          </p>
-
-          {/* Error Message display if any */}
-          {error && (
-            <div className="mb-4 text-[13px] text-zinc-650 border-l-2 border-orange-500 pl-3 py-1 font-mono">
-              {error}
+        <div className="relative w-full overflow-hidden">
+          <HeroDitheringBackground>
+          <section className="pt-24 pb-20 max-w-[680px] text-left">
+            
+            {/* Eyebrow Label */}
+            <div className="text-[11px] font-bold text-zinc-450 uppercase tracking-widest mb-4">
+              AI-Powered Productivity · Built with AI Studio
             </div>
-          )}
 
-          {/* CTA Row */}
-          <div className="flex items-center gap-2 mb-2">
-            <button
-              onClick={handleGoogleSignIn}
-              disabled={loading}
-              className="bg-zinc-900 hover:bg-zinc-800 text-white font-medium text-[13px] h-[36px] px-[18px] rounded-[6px] transition-all duration-120 cursor-pointer"
-            >
-              {loading ? "Authorizing..." : "Start for free"}
-            </button>
-            <button
-              onClick={() => {
-                const element = document.getElementById("how-it-works-sec");
-                if (element) {
-                  element.scrollIntoView({ behavior: "smooth" });
-                }
-              }}
-              className="bg-transparent border border-zinc-200 text-zinc-500 hover:text-zinc-900 hover:border-zinc-350 font-medium text-[13px] h-[36px] px-[18px] rounded-[6px] transition-all duration-120 cursor-pointer"
-            >
-              See how it works
-            </button>
-          </div>
+            {/* Headline */}
+            <h1 className="text-[52px] font-light text-zinc-900 leading-[1.1] tracking-[-0.03em] mb-5">
+              Stop managing tasks.<br />
+              Start finishing them.
+            </h1>
 
-          <div className="text-[11px] text-zinc-400 font-normal mt-3">
-            Free to use · Powered by Gemini 3.5 Flash · No credit card
-          </div>
-        </section>
+            {/* Subtext */}
+            <p className="text-[16px] font-normal text-zinc-500 leading-[1.65] max-w-[480px] mb-7">
+              Stride is your AI productivity companion that thinks ahead —
+              extracting tasks from your thoughts, photos, and voice,
+              then building a schedule that actually keeps you on track.
+            </p>
 
+            {/* Error Message display if any */}
+            {error && (
+              <div className="mb-4 text-[13px] text-zinc-650 border-l-2 border-orange-500 pl-3 py-1 font-mono">
+                {error}
+              </div>
+            )}
+
+            {/* CTA Row */}
+            <div className="flex items-center gap-2 mb-2">
+              <button
+                onClick={handleGoogleSignIn}
+                disabled={loading}
+                className="bg-zinc-900 hover:bg-zinc-800 text-white font-medium text-[13px] h-[36px] px-[18px] rounded-[6px] transition-all duration-120 cursor-pointer"
+              >
+                {loading ? "Authorizing..." : "Start for free"}
+              </button>
+              <button
+                onClick={() => {
+                  const element = document.getElementById("how-it-works-sec");
+                  if (element) {
+                    element.scrollIntoView({ behavior: "smooth" });
+                  }
+                }}
+                className="bg-transparent border border-zinc-200 text-zinc-500 hover:text-zinc-900 hover:border-zinc-350 font-medium text-[13px] h-[36px] px-[18px] rounded-[6px] transition-all duration-120 cursor-pointer"
+              >
+                See how it works
+              </button>
+            </div>
+
+            <div className="text-[11px] text-zinc-400 font-normal mt-3">
+              Free to use · Powered by Gemini 3.1 Flash Lite · No credit card
+            </div>
+          </section>
+        </HeroDitheringBackground>
+        </div>
+
+        <div className="w-full max-w-[1280px] mx-auto px-12">
         {/* STATS ROW */}
         <section className="mb-20 text-left border-y border-zinc-200 py-10">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -499,10 +505,11 @@ export default function Home({ onSignedIn }: HomeProps) {
               Start using Stride free
             </button>
             <div className="text-[11px] text-zinc-400 font-normal">
-              Gemini 3.5 Flash · Firebase · Google Calendar · Google AI Studio
+              Gemini 3.1 Flash Lite · Firebase · Google Calendar · Google AI Studio
             </div>
           </div>
         </section>
+        </div>
 
       </main>
 
@@ -517,7 +524,7 @@ export default function Home({ onSignedIn }: HomeProps) {
             </div>
           </div>
           <div className="text-[13px] text-zinc-400">
-            Gemini 3.5 Flash · Firebase · Google AI Studio
+            Gemini 3.1 Flash Lite · Firebase · Google AI Studio
           </div>
         </div>
       </footer>

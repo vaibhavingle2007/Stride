@@ -4,7 +4,7 @@
 
 Stride is a full-stack AI productivity companion that thinks ahead — extracting tasks from your thoughts, photos, and voice, then building a schedule that actually keeps you on track.
 
-Built for the **Vibe2Ship Hackathon** using **Google AI Studio**, **Gemini 3.5 Flash**, **Firebase**, and **React**.
+Built for the **Vibe2Ship Hackathon** using **Google AI Studio**, **Gemini 3.1 Flash Lite**, **Firebase**, and **React**.
 
 ---
 
@@ -37,7 +37,7 @@ Stride packs **13+ AI-powered features** into one clean interface:
 |---|---|
 | **Frontend** | React 19, TypeScript, Vite 6, Tailwind CSS v4 |
 | **Backend** | Node.js, Express, TypeScript (`tsx`) |
-| **AI** | Google Gemini 3.5 Flash (`@google/genai`) |
+| **AI** | Google Gemini 3.1 Flash Lite (`@google/genai`) |
 | **Auth** | Firebase Authentication (Google Sign-In) |
 | **Database** | Cloud Firestore |
 | **Calendar** | Google Calendar API (OAuth 2.0) |
@@ -233,7 +233,7 @@ The Express backend exposes these AI and calendar routes:
 
 Stride uses a resilient Gemini call architecture with:
 
-- **Model Fallback**: Automatically falls back to `gemini-3.5-flash` if the preferred model fails
+- **Model Fallback**: Automatically falls back to `gemini-3.1-flash-lite` if the preferred model fails
 - **Exponential Backoff**: Retries up to 3 times for transient errors (429, 503, 504) with 1.5s → 3s delays
 - **JSON Extraction**: A robust `extractJson()` utility that handles markdown-wrapped, text-prefixed, or clean JSON responses from the model
 

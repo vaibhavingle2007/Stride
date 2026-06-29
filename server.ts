@@ -193,7 +193,7 @@ export async function generateContentWithFallback(
   contents: any,
   config?: any
 ) {
-  const modelsToTry = Array.from(new Set([preferredModel, "gemini-3.5-flash"]));
+  const modelsToTry = Array.from(new Set([preferredModel, "gemini-3.1-flash-lite"]));
   let lastError: any = null;
 
   for (const model of modelsToTry) {
@@ -257,7 +257,7 @@ async function startServer() {
   app.use(express.json({ limit: '50mb' }));
   app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
-  // API Route: Analyze Tasks using Gemini 2.0 Flash
+  // API Route: Analyze Tasks using Gemini 3.1 Flash Lite
   app.post("/api/analyze", async (req, res) => {
     try {
       const { tasks } = req.body;
@@ -304,7 +304,7 @@ ${JSON.stringify(tasks, null, 2)}
 Respond ONLY with a valid JSON document conforming to this exact structure. Do not include markdown formatting or wrapper block quotes like \`\`\`json.`;
 
       // Call Gemini using our fallback helper to resiliently manage high demand
-      const response = await generateContentWithFallback(ai, "gemini-3.5-flash", prompt, {
+      const response = await generateContentWithFallback(ai, "gemini-3.1-flash-lite", prompt, {
         responseMimeType: "application/json"
       });
 
@@ -374,7 +374,7 @@ ${safeText}
 [END RAW TEXT]`;
 
       // Call Gemini using our fallback helper to resiliently manage high demand
-      const response = await generateContentWithFallback(ai, "gemini-3.5-flash", prompt, {
+      const response = await generateContentWithFallback(ai, "gemini-3.1-flash-lite", prompt, {
         responseMimeType: "application/json"
       });
 
@@ -431,7 +431,7 @@ Return ONLY valid JSON:
 Return ONLY the JSON.`;
 
       // Call Gemini using our fallback helper to resiliently manage high demand
-      const response = await generateContentWithFallback(ai, "gemini-3.5-flash", prompt, {
+      const response = await generateContentWithFallback(ai, "gemini-3.1-flash-lite", prompt, {
         responseMimeType: "application/json"
       });
 
@@ -479,7 +479,7 @@ Return ONLY valid JSON:
 Return ONLY valid JSON.`;
 
       // Call Gemini using our fallback helper to resiliently manage high demand
-      const response = await generateContentWithFallback(ai, "gemini-3.5-flash", prompt, {
+      const response = await generateContentWithFallback(ai, "gemini-3.1-flash-lite", prompt, {
         responseMimeType: "application/json"
       });
 
@@ -545,7 +545,7 @@ Rules:
       }));
 
       // Call Gemini using our fallback helper to resiliently manage high demand
-      const response = await generateContentWithFallback(ai, "gemini-3.5-flash", contents, {
+      const response = await generateContentWithFallback(ai, "gemini-3.1-flash-lite", contents, {
         systemInstruction,
       });
 
@@ -591,7 +591,7 @@ Example good response: "You've completed 4 tasks this week but all 3 high-priori
 items are still pending. Focus on 'Submit Vibe2Ship' first — it's due in 6 days."`;
 
       // Call Gemini using fallback helper
-      const response = await generateContentWithFallback(ai, "gemini-3.5-flash", prompt);
+      const response = await generateContentWithFallback(ai, "gemini-3.1-flash-lite", prompt);
       const resultText = response.text || "No insight generated at this time.";
       return res.json({ insight: resultText.trim() });
 
@@ -965,7 +965,7 @@ Return ONLY the JSON object. Never include markdown,
 code fences, or any text outside the JSON.
 `;
 
-      const response = await generateContentWithFallback(ai, "gemini-3.1-pro-preview", [
+      const response = await generateContentWithFallback(ai, "gemini-3.1-flash-lite", [
         {
           inlineData: {
             mimeType,
@@ -1023,7 +1023,7 @@ Do NOT use markdown outside the JSON.
 Example format:
 { "explanation": "This task is due today, high priority, and has already been delayed twice." }`;
 
-      const response = await generateContentWithFallback(ai, "gemini-3.5-flash", prompt, {
+      const response = await generateContentWithFallback(ai, "gemini-3.1-flash-lite", prompt, {
         temperature: 0.2,
       });
 
@@ -1073,7 +1073,7 @@ Example format:
   ]
 }`;
 
-      const response = await generateContentWithFallback(ai, "gemini-3.5-flash", prompt, {
+      const response = await generateContentWithFallback(ai, "gemini-3.1-flash-lite", prompt, {
         temperature: 0.3,
       });
 
