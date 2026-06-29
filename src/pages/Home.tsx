@@ -32,7 +32,7 @@ export default function Home({ onSignedIn }: HomeProps) {
   };
 
   return (
-    <div className="min-h-screen bg-white text-zinc-900 font-sans flex flex-col justify-between selection:bg-zinc-200">
+    <div className="min-h-screen bg-white text-zinc-900 font-sans flex flex-col justify-between selection:bg-zinc-200 overflow-x-hidden">
       
       {/* NAVBAR */}
       <header className="h-[52px] border-b border-zinc-200 bg-white sticky top-0 z-50 transition-all duration-150">
@@ -65,7 +65,7 @@ export default function Home({ onSignedIn }: HomeProps) {
         {/* HERO SECTION */}
         <div className="relative w-full overflow-hidden">
           <HeroDitheringBackground>
-          <section className="pt-24 pb-20 max-w-[680px] text-left">
+          <section id="stride-hero" className="pt-24 pb-20 max-w-[680px] text-left">
             
             {/* Eyebrow Label */}
             <div className="text-[11px] font-bold text-zinc-450 uppercase tracking-widest mb-4">
@@ -123,7 +123,7 @@ export default function Home({ onSignedIn }: HomeProps) {
 
         <div className="w-full max-w-[1280px] mx-auto px-12">
         {/* STATS ROW */}
-        <section className="mb-20 text-left border-y border-zinc-200 py-10">
+        <section className="relative z-10 mb-20 text-left border-y border-zinc-200 py-10">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div>
               <div className="text-[32px] font-light text-zinc-900 mb-1">13+</div>
@@ -141,7 +141,7 @@ export default function Home({ onSignedIn }: HomeProps) {
         </section>
 
         {/* APP PREVIEW MOCKUP */}
-        <section className="mb-20">
+        <section className="relative z-10 mb-20">
           <div className="border border-zinc-200 rounded-[10px] overflow-hidden bg-zinc-50">
             
             {/* Top bar */}
@@ -223,7 +223,7 @@ export default function Home({ onSignedIn }: HomeProps) {
         </section>
 
         {/* HOW IT WORKS */}
-        <section id="how-it-works-sec" className="mb-20 text-left">
+        <section id="how-it-works-sec" className="relative z-10 mb-20 text-left">
           
           {/* Label */}
           <div className="text-[11px] font-semibold tracking-[0.08em] text-zinc-400 uppercase mb-4">
@@ -296,7 +296,7 @@ export default function Home({ onSignedIn }: HomeProps) {
         </section>
 
         {/* FEATURES */}
-        <section className="mb-24 text-left">
+        <section className="relative z-10 mb-24 text-left">
           <div className="grid grid-cols-1 md:grid-cols-10 gap-8">
             
             {/* Sticky/Fixed Left (40% columns) */}
@@ -444,7 +444,7 @@ export default function Home({ onSignedIn }: HomeProps) {
         </section>
 
         {/* THREE WAYS TO ADD TASKS */}
-        <section className="mb-24 py-16">
+        <section className="relative z-10 mb-24 py-16">
           <div className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest text-center mb-3">
             THREE WAYS TO ADD TASKS
           </div>
@@ -489,7 +489,7 @@ export default function Home({ onSignedIn }: HomeProps) {
         </section>
 
         {/* FINAL CTA */}
-        <section className="mb-24 text-center">
+        <section className="relative z-10 mb-24 text-center">
           <h2 className="text-[40px] font-light text-zinc-900 mb-2">
             Your deadlines won't wait.
           </h2>
@@ -514,7 +514,7 @@ export default function Home({ onSignedIn }: HomeProps) {
       </main>
 
       {/* FOOTER */}
-      <footer className="border-t border-zinc-200 bg-white py-7 transition-all duration-150">
+      <footer className="relative z-10 border-t border-zinc-200 bg-white py-7 transition-all duration-150">
         <div className="max-w-[1280px] mx-auto px-12 flex flex-col sm:flex-row justify-between items-center gap-4">
           <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 text-[13px] text-zinc-400">
             <span>Stride · © 2026 · Built for Vibe2Ship Hackathon</span>

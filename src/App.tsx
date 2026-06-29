@@ -12,6 +12,8 @@ import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 import { ArrowRight } from "lucide-react";
 
+import TrailGrid from "./components/ui/trail-grid";
+
 export default function App() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -83,7 +85,12 @@ export default function App() {
   // EXACTLY FIVE distinct route pathways
   switch (path) {
     case "/":
-      return <Home onSignedIn={handleSignedIn} />;
+      return (
+        <div className="relative">
+          <TrailGrid cellSize={36} duration={200} cellColor="#E4E4E7" />
+          <Home onSignedIn={handleSignedIn} />
+        </div>
+      );
     case "/privacy":
       return <Privacy />;
     case "/terms":
@@ -120,6 +127,11 @@ export default function App() {
       );
     default:
       // Route fallbacks seamlessly to landing
-      return <Home onSignedIn={handleSignedIn} />;
+      return (
+        <div className="relative">
+          <TrailGrid cellSize={36} duration={200} cellColor="#E4E4E7" />
+          <Home onSignedIn={handleSignedIn} />
+        </div>
+      );
   }
 }
