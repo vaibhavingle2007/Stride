@@ -6,7 +6,7 @@ Stride is a full-stack AI productivity companion built on **Google Gemini**. Tel
 
 Built for the **Vibe2Ship Hackathon** with React 19, Express, Firebase, and Gemini 3.1 Flash Lite.
 
-![Dashboard](docs/dashboard.png)
+![Dashboard](docs/Dashboard.png)
 
 ---
 
@@ -97,7 +97,7 @@ npm run build    # production bundle
 
 | Dashboard | Snap & Plan | Analytics |
 |---|---|---|
-| ![Dashboard](docs/dashboard.png) | ![Snap & Plan](docs/snap.png) | ![Analytics](docs/analytics.png) |
+| ![Dashboard](docs/Dashboard.png) | ![Snap & Plan](docs/snap.png) | ![Analytics](docs/analytics.png) |
 
 ---
 
